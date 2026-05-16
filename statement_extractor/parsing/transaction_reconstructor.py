@@ -175,15 +175,35 @@ class TransactionReconstructor:
 
         # --- Narration ---
         description = self._resolve_narration(
-            buckets["narration"] + buckets["date"], 
-            buckets["unknown"], 
-            txn_date, 
+            buckets["narration"] + buckets["date"],
+            buckets["unknown"],
+            txn_date,
             reference_no
         )
 
-        # Drop rows that are only metadata (no balance and no movement)
-        if balance is None and debit is None and credit is None:
-            return None
+        # ------------------------------------------------------------------
+        # Generalized structural guard (bank-agnostic)
+        # ------------------------------------------------------------------
+        # By accounting definition, a debit/credit transaction MUST carry at
+        # least one financial movement (debit OR credit).  A row that has only
+        # a balance value and no movement is structurally metadata:
+        #   - Opening balance marker   (first row of the statement)
+        #   - Summary / totals footer  (e.g. "Statement Balance as on:")
+        #   - Account info row         (e.g. "A/c No: 12345  Balance: X")
+        #
+        # EXCEPTION: if the row carries a *structurally valid* calendar date
+        # (day 1-31, month 1-12) it is treated as an opening-balance entry and
+        # kept.  An 8-digit credit card fragment that accidentally matches a
+        # date regex (e.g. "68212345") will fail this check and be dropped.
+        # ------------------------------------------------------------------
+        if debit is None and credit is None:
+            if not self._is_valid_calendar_date(txn_date):
+                # No movement + no real date → definitively metadata, not a transaction
+                return None
+            # Has a real date but no movement → keep as opening-balance entry
+            # (single-balance row; movement will be resolved later if needed)
+
+        # Drop remaining true noise rows (already passed structural check)
         if is_noise_row(row):
             return None
         if not description and txn_date is None and balance is None:
@@ -290,3 +310,84 @@ class TransactionReconstructor:
                 parts.append(text)
 
         return " ".join(parts).strip() if parts else ""
+
+    # ------------------------------------------------------------------
+    # Structural date validator (bank-agnostic)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _is_valid_calendar_date(date_str: Optional[str]) -> bool:
+        """
+        Return True only if *date_str* represents a structurally valid
+        calendar date (day 1–31, month 1–12).
+
+        Rejects:
+        - None / empty
+        - Bare digit strings (e.g. "68212345" — credit card fragment)
+        - Values where day > 31 or month > 12
+        - Pure numeric strings with no separator (reference numbers)
+
+        Accepts:
+        - "01-03-2025"  → day=01, month=03 → valid
+        - "20/03/2025"  → valid
+        - "01 Mar 2025" → valid (month name)
+        - "33-03-2025"  → day=33 → INVALID (OCR error in doc is kept as-is
+                          but this row has movement so it won't reach this check)
+        """
+        if not date_str:
+            return False
+
+        # If the date string is all digits (possibly with spaces) and ≥ 7 chars
+        # it is likely a reference number / account number, not a real date.
+        stripped = date_str.replace(" ", "").replace("-", "").replace("/", "")
+        if stripped.isdigit() and len(stripped) >= 7:
+            # Only accept DDMMYYYY / YYYYMMDD patterns with valid ranges
+            s = stripped
+            if len(s) == 8:
+                # Try DD MM YYYY
+                try:
+                    day, month = int(s[0:2]), int(s[2:4])
+                    if 1 <= day <= 31 and 1 <= month <= 12:
+                        return True
+                except ValueError:
+                    pass
+                # Try YYYY MM DD
+                try:
+                    month, day = int(s[4:6]), int(s[6:8])
+                    if 1 <= day <= 31 and 1 <= month <= 12:
+                        return True
+                except ValueError:
+                    pass
+            return False  # bare long digit string — not a real date
+
+        # Has separators or month names — apply range check on first two numeric parts
+        parts = re.split(r"[-/\s,]+", date_str.strip())
+        numeric_parts = []
+        for p in parts:
+            p = p.strip()
+            if p.isdigit():
+                numeric_parts.append(int(p))
+
+        if len(numeric_parts) >= 2:
+            # Heuristic: if either of the first two parts is clearly a year (>31),
+            # the other is day/month. Check neither exceeds valid ranges.
+            a, b = numeric_parts[0], numeric_parts[1]
+            if a > 1900:
+                # YYYY-MM-DD style: b is month
+                return 1 <= b <= 12
+            if b > 1900:
+                # DD-MM-YYYY style: a is day
+                return 1 <= a <= 31
+            # DD-MM style (no year): validate day and month
+            return 1 <= a <= 31 and 1 <= b <= 12
+
+        # Contains a month name (e.g. "01 Mar 2025") — always structural valid
+        _MONTH_NAMES = {
+            "jan", "feb", "mar", "apr", "may", "jun",
+            "jul", "aug", "sep", "oct", "nov", "dec",
+        }
+        date_lower = date_str.lower()
+        if any(m in date_lower for m in _MONTH_NAMES):
+            return True
+
+        return False

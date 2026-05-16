@@ -4,7 +4,7 @@
 
 # Core OCR
 paddlepaddle==2.6.2          # CPU build; use paddlepaddle-gpu for CUDA
-paddleocr==2.9.1
+paddleocr==2.9.1             # PP-OCRv4 (stable CPU build)
 
 # Image processing
 opencv-python-headless==4.10.0.84
@@ -17,15 +17,25 @@ pdf2image==1.17.0            # fallback (requires poppler system package)
 # Numeric & layout
 numpy>=1.26.0,<3.0
 pandas>=2.2.0
-scikit-learn>=1.5.0
+scikit-learn>=1.5.0          # DBSCAN for row/column clustering
 
 # Data validation
 pydantic>=2.5.0
 pydantic-settings>=2.0.0
 
-# Fuzzy matching
+# Fuzzy matching (header inference)
 rapidfuzz>=3.8.0
 
-# Utilities (already in the venv — listed for completeness)
+# Utilities
 python-dotenv>=1.0.0
 requests>=2.31.0
+
+# ============================================================
+# Optional — Table Transformer (Tier 1 upgrade, Option A)
+# Install only if you want deep table structure recognition.
+# Falls back to DBSCAN column detection if not installed.
+# Requires ~2GB for model weights.
+# ============================================================
+# torch>=2.0.0
+# transformers>=4.40.0
+# torchvision>=0.15.0

@@ -76,6 +76,36 @@ class ValidationStatus(str, Enum):
     FAILED       = "failed"
 
 
+class RegionType(str, Enum):
+    """Layout region classification result."""
+    TRANSACTION_TABLE = "transaction_table"
+    METADATA_TABLE    = "metadata_table"
+    FOOTER            = "footer"
+    HEADER_BLOCK      = "header_block"
+    NOISE             = "noise"
+
+
+class BankProfile(BaseModel):
+    """Detected bank identity and optional extraction hints."""
+    bank_id: str = "UNKNOWN"            # e.g. "ICICI", "HDFC", "SBI"
+    bank_name: str = "Unknown Bank"
+    confidence: float = 0.0             # 0–1 detection confidence
+    # Advisory hints for the extraction pipeline (all optional)
+    date_format_hint: Optional[str] = None     # e.g. "DD/MM/YYYY"
+    debit_left_of_credit: Optional[bool] = None  # column order hint
+    has_cr_dr_suffix: Optional[bool] = None    # whether amounts carry CR/DR suffix
+
+
+class ConfidenceFactors(BaseModel):
+    """Per-transaction breakdown of confidence score components."""
+    ocr_confidence: float = 0.0
+    arithmetic_score: float = 0.0
+    date_parse_score: float = 0.0
+    amount_parse_score: float = 0.0
+    column_assignment_score: float = 0.0
+    fused_score: float = 0.0
+
+
 # ---------------------------------------------------------------------------
 # Output transaction model
 # ---------------------------------------------------------------------------
@@ -92,6 +122,8 @@ class Transaction(BaseModel):
     validation_status: ValidationStatus = ValidationStatus.NEEDS_REVIEW
     page_num:          int             = 0
     raw_text:          str             = ""
+    # Optional enriched fields (populated when confidence fusion is enabled)
+    confidence_factors: Optional[ConfidenceFactors] = None
 
 
 class ExtractedTable(BaseModel):
@@ -99,16 +131,21 @@ class ExtractedTable(BaseModel):
     table_id: str
     headers: List[str]
     rows: List[Dict[str, str]]
+    region_type: str = RegionType.METADATA_TABLE
 
 
 class ExtractionResult(BaseModel):
     """Top-level output of the extraction engine."""
-    transactions:        List[Transaction]    = Field(default_factory=list)
-    extracted_tables:    List[ExtractedTable] = Field(default_factory=list)
-    total_pages:         int                  = 0
-    source_file:         str                  = ""
-    extraction_warnings: List[str]            = Field(default_factory=list)
-    column_mapping:      Dict[str, str]       = Field(default_factory=dict)
+    transactions:             List[Transaction]    = Field(default_factory=list)
+    extracted_tables:         List[ExtractedTable] = Field(default_factory=list)
+    total_pages:              int                  = 0
+    source_file:              str                  = ""
+    extraction_warnings:      List[str]            = Field(default_factory=list)
+    column_mapping:           Dict[str, str]       = Field(default_factory=dict)
+    # Enterprise fields
+    bank_profile:             Optional[BankProfile] = None
+    document_confidence_score: float               = Field(default=0.0, ge=0.0, le=1.0)
+    validated_ratio:          float                = Field(default=0.0, ge=0.0, le=1.0)
 
     def save_to_json(self, output_path: str) -> None:
         """Write this result to a JSON file."""

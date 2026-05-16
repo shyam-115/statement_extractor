@@ -215,6 +215,15 @@ class NumericParser:
         """Parse and return the float value only, ignoring sign semantics, while healing OCR typos like 1,95.009.02"""
         t = text.strip()
         
+        # Guard: do not hallucinate amounts from explicit dates (e.g. "02 Apr 2026" -> 22026.0)
+        if self.is_date(t):
+            return None
+            
+        # Guard: require the string to be predominantly numeric before aggressive stripping
+        if not self.looks_like_number(t):
+            return None
+
+        
         # Remove trailing/leading text that isn't a digit, decimal, comma, or minus
         t = re.sub(r"[^\d.,-]", "", t)
         if not t:
