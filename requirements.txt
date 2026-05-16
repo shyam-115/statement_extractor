@@ -1,0 +1,31 @@
+# ============================================================
+# Statement Extractor — Production Requirements
+# ============================================================
+
+# Core OCR
+paddlepaddle==2.6.2          # CPU build; use paddlepaddle-gpu for CUDA
+paddleocr==2.9.1
+
+# Image processing
+opencv-python-headless==4.10.0.84
+Pillow>=10.0.0
+
+# PDF handling (primary + fallback)
+pymupdf==1.24.14             # fitz — fast, no external deps
+pdf2image==1.17.0            # fallback (requires poppler system package)
+
+# Numeric & layout
+numpy>=1.26.0,<3.0
+pandas>=2.2.0
+scikit-learn>=1.5.0
+
+# Data validation
+pydantic>=2.5.0
+pydantic-settings>=2.0.0
+
+# Fuzzy matching
+rapidfuzz>=3.8.0
+
+# Utilities (already in the venv — listed for completeness)
+python-dotenv>=1.0.0
+requests>=2.31.0
