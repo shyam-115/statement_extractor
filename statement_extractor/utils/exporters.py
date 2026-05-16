@@ -39,8 +39,10 @@ def save_to_json(result: ExtractionResult, output_path: str) -> None:
         "source_file": result.source_file,
         "total_pages": result.total_pages,
         "total_transactions": len(result.transactions),
+        "total_extracted_tables": len(result.extracted_tables),
         "column_mapping": result.column_mapping,
         "extraction_warnings": result.extraction_warnings,
+        "extracted_tables": [t.dict() for t in result.extracted_tables],
         "transactions": [_txn_to_dict(t) for t in result.transactions],
     }
 

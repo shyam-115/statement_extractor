@@ -70,27 +70,32 @@ class HeaderInference:
     ) -> List[ColumnZone]:
         """
         Assign semantic_role to each zone and return the updated list.
-
-        Parameters
-        ----------
-        zones : ColumnZone list from ColumnDetector
-        rows  : all LogicalRow objects (headers flagged)
         """
         if not zones:
             return zones
 
-        header_rows = [r for r in rows if r.is_header]
+        # Check for both page-level headers and table-level headers
+        header_rows = [r for r in rows if r.is_header or r.is_table_header]
 
+        used_fallback = False
         if header_rows:
             zones = self._match_from_headers(zones, header_rows)
+            # If we matched at least debit or credit from explicit headers, we trust the order
+            has_explicit_roles = any(z.semantic_role in ("debit", "credit") for z in zones)
+            if not has_explicit_roles:
+                used_fallback = True
         else:
             logger.info("No header rows found — applying positional heuristics")
+            used_fallback = True
 
         # Fill any unassigned zones with positional fallback
         zones = self._positional_fallback(zones)
 
-        # Withdrawal/debit is typically left of deposit/credit on statements
-        zones = self._ensure_debit_left_of_credit(zones)
+        # Withdrawal/debit is typically left of deposit/credit on statements.
+        # ONLY apply this risky swap if we used positional fallback.
+        # ICICI and some others put Deposits (Credit) on the left!
+        if used_fallback:
+            zones = self._ensure_debit_left_of_credit(zones)
 
         # Log final role assignment
         for z in zones:
@@ -124,7 +129,10 @@ class HeaderInference:
                 for token in hrow.tokens:
                     if zone.left_boundary <= token.normalized_x <= zone.right_boundary:
                         tokens_in_zone.append(token.text)
-            zone_texts[zone.column_id] = " ".join(tokens_in_zone).lower().strip()
+            original_candidate = " ".join(tokens_in_zone).strip()
+            if original_candidate:
+                zone.header_text = original_candidate
+            zone_texts[zone.column_id] = original_candidate.lower()
 
         # Score each zone against each role vocabulary
         # Structure: {role: (best_zone_id, best_score)}
@@ -169,7 +177,10 @@ class HeaderInference:
                 for token in hrow.tokens:
                     if zone.left_boundary <= token.normalized_x <= zone.right_boundary:
                         tokens_in_zone.append(token.text)
-            zone_texts[zone.column_id] = " ".join(tokens_in_zone).lower().strip()
+            original_candidate = " ".join(tokens_in_zone).strip()
+            if original_candidate:
+                zone.header_text = original_candidate
+            zone_texts[zone.column_id] = original_candidate.lower()
 
         assigned: set = set()
         for role in ROLE_PRIORITY:

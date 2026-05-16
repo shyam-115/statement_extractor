@@ -101,14 +101,26 @@ class DebugVisualizer:
         h: int,
     ) -> np.ndarray:
         overlay = img.copy()
+        
+        # Group zones by table to draw table boundaries
+        table_bounds = set((z.top_boundary, z.bottom_boundary) for z in zones if z.bottom_boundary > 0)
+        for top, bottom in table_bounds:
+            t_y1, t_y2 = int(top), int(bottom)
+            # Draw a solid border around the entire table block
+            cv2.rectangle(img, (0, t_y1), (w, t_y2), (0, 150, 255), 2)
+
         for zone in zones:
             x1 = int(zone.left_boundary * w)
             x2 = int(zone.right_boundary * w)
-            cv2.rectangle(overlay, (x1, 0), (x2, h), _CLR_COL_BAND, -1)
+            y1 = int(zone.top_boundary) if zone.top_boundary > 0 else 0
+            y2 = int(zone.bottom_boundary) if zone.bottom_boundary > 0 else h
+            
+            # Draw column pillar strictly within the table boundaries
+            cv2.rectangle(overlay, (x1, y1), (x2, y2), _CLR_COL_BAND, -1)
             label = zone.semantic_role or f"col{zone.column_id}"
             cv2.putText(
                 img, label,
-                (x1 + 2, 20 + zone.column_id * 16),
+                (x1 + 2, y1 + 20 + zone.column_id * 16),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, _CLR_COL_BAND, 1, cv2.LINE_AA,
             )
         return cv2.addWeighted(overlay, _ALPHA, img, 1 - _ALPHA, 0)

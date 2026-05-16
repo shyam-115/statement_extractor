@@ -46,6 +46,7 @@ class LogicalRow(BaseModel):
     page_num: int
     y_center: float            # representative y of the row (normalised)
     is_header: bool = False
+    is_table_header: bool = False
     is_continuation: bool = False   # True if this row is a narration continuation
 
     @property
@@ -61,8 +62,11 @@ class ColumnZone(BaseModel):
     x_center: float
     left_boundary: float
     right_boundary: float
+    top_boundary: float = 0.0          # Used for table-bound visual rendering
+    bottom_boundary: float = 0.0       # Used for table-bound visual rendering
     support: int = 0           # number of numeric tokens that voted for this column
     semantic_role: Optional[str] = None  # date|narration|debit|credit|balance|reference
+    header_text: Optional[str] = None    # literal text captured from the document
 
 
 class ValidationStatus(str, Enum):
@@ -90,13 +94,21 @@ class Transaction(BaseModel):
     raw_text:          str             = ""
 
 
+class ExtractedTable(BaseModel):
+    """A generic representation of any table extracted from the document."""
+    table_id: str
+    headers: List[str]
+    rows: List[Dict[str, str]]
+
+
 class ExtractionResult(BaseModel):
     """Top-level output of the extraction engine."""
-    transactions:        List[Transaction] = Field(default_factory=list)
-    total_pages:         int               = 0
-    source_file:         str               = ""
-    extraction_warnings: List[str]         = Field(default_factory=list)
-    column_mapping:      Dict[str, str]    = Field(default_factory=dict)
+    transactions:        List[Transaction]    = Field(default_factory=list)
+    extracted_tables:    List[ExtractedTable] = Field(default_factory=list)
+    total_pages:         int                  = 0
+    source_file:         str                  = ""
+    extraction_warnings: List[str]            = Field(default_factory=list)
+    column_mapping:      Dict[str, str]       = Field(default_factory=dict)
 
     def save_to_json(self, output_path: str) -> None:
         """Write this result to a JSON file."""

@@ -175,7 +175,10 @@ class TransactionReconstructor:
 
         # --- Narration ---
         description = self._resolve_narration(
-            buckets["narration"], buckets["unknown"], txn_date, reference_no
+            buckets["narration"] + buckets["date"], 
+            buckets["unknown"], 
+            txn_date, 
+            reference_no
         )
 
         # Drop rows that are only metadata (no balance and no movement)
@@ -265,31 +268,25 @@ class TransactionReconstructor:
         reference_no: Optional[str],
     ) -> Optional[str]:
         """
-        Build a clean narration string by joining non-date, non-reference
-        tokens from the narration and unknown buckets.
+        Build a clean narration string by joining non-date tokens 
+        from the narration, date, and unknown buckets.
         """
         parts: List[str] = []
-        for token in narration_tokens:
+        tokens = sorted(narration_tokens + unknown_tokens, key=lambda t: t.normalized_x)
+        for token in tokens:
             text = token.text.strip()
             if not text:
                 continue
-            # Skip tokens that were already captured as date/reference
-            if txn_date and text == txn_date:
-                continue
-            if reference_no and text == reference_no:
-                continue
-            # Skip tokens that are purely numeric (likely misrouted amounts)
-            if token.is_numeric:
-                continue
-            parts.append(text)
+                
+            # If OCR merged the date and narration (e.g. "01-03-2025BY-TRANSFER"),
+            # strip the date out to recover the residual narration text.
+            if txn_date and txn_date in text:
+                text = text.replace(txn_date, "").strip()
+                
+            # Clean up residual artifacts from stripping
+            text = re.sub(r"^[-/]+|[-/]+$", "", text).strip()
+            
+            if text and not self._parser.is_amount(text):
+                parts.append(text)
 
-        # Non-numeric unknown tokens also contribute to narration
-        for token in unknown_tokens:
-            if not token.is_numeric and not token.is_date:
-                text = token.text.strip()
-                if text:
-                    parts.append(text)
-
-        if not parts:
-            return None
-        return " ".join(parts)
+        return " ".join(parts).strip() if parts else ""

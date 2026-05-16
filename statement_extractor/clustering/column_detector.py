@@ -63,6 +63,44 @@ class ColumnDetector:
         -------
         Sorted list of ColumnZone objects (left → right).
         """
+        if not rows:
+            return []
+
+        # 1. Header-Driven Column Generation
+        table_headers = [r for r in rows if r.is_table_header]
+        if table_headers:
+            # Use the tokens from the last strong header row (closest to data)
+            last_header = table_headers[-1]
+            zones: List[ColumnZone] = []
+            
+            # Sort tokens by x_center to ensure left-to-right order
+            sorted_tokens = sorted(last_header.tokens, key=lambda t: t.normalized_x)
+            
+            for col_id, token in enumerate(sorted_tokens):
+                zones.append(ColumnZone(
+                    column_id=col_id,
+                    x_center=token.normalized_x,
+                    left_boundary=0.0,
+                    right_boundary=1.0,
+                    support=10, # Fake high support so it's not filtered out
+                ))
+            
+            # Precisely calculate midpoints between header tokens for boundaries
+            for i in range(len(zones)):
+                if i > 0:
+                    zones[i].left_boundary = (zones[i-1].x_center + zones[i].x_center) / 2.0
+                else:
+                    zones[i].left_boundary = 0.0
+                    
+                if i < len(zones) - 1:
+                    zones[i].right_boundary = (zones[i].x_center + zones[i+1].x_center) / 2.0
+                else:
+                    zones[i].right_boundary = 1.0
+                    
+            logger.debug("Created %d header-driven column zones", len(zones))
+            return zones
+
+        # 2. Fallback to Numeric Clustering (DBSCAN)
         numeric_x: List[float] = []
         for row in rows:
             if row.is_header:

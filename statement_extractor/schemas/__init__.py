@@ -6,6 +6,7 @@ from .models import (   # noqa: F401
     ValidationStatus,
     Transaction,
     ExtractionResult,
+    ExtractedTable,
 )
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "ValidationStatus",
     "Transaction",
     "ExtractionResult",
+    "ExtractedTable",
 ]

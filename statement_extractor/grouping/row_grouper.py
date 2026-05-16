@@ -143,10 +143,12 @@ class RowGrouper:
     def _detect_continuations(self, rows: List[LogicalRow]) -> List[LogicalRow]:
         """
         Mark a row as a narration continuation if:
-        - It has no numeric tokens
-        - Its y_center is within narration_y_gap_fraction of the previous row
-        - The previous row is not a continuation itself (to avoid runaway chains)
+        - It does NOT contain a date or a valid financial amount.
+        - Its y_center is within narration_y_gap_fraction of the previous row.
+        - The previous row is not a continuation itself.
         """
+        from ..parsing.numeric_parser import NumericParser
+        
         gap = self.config.narration_y_gap_fraction
         for i in range(1, len(rows)):
             prev = rows[i - 1]
@@ -154,7 +156,10 @@ class RowGrouper:
             if curr.is_header or prev.is_header:
                 continue
             y_diff = curr.y_center - prev.y_center
-            has_numeric = any(t.is_numeric or t.is_date for t in curr.tokens)
-            if not has_numeric and y_diff <= gap:
+            
+            has_date = any(t.is_date for t in curr.tokens)
+            has_amount = any(NumericParser.is_amount(t.text) for t in curr.tokens)
+            
+            if not has_date and not has_amount and y_diff <= gap:
                 curr.is_continuation = True
         return rows

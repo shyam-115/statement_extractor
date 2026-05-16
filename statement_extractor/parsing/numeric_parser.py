@@ -48,9 +48,9 @@ _NEGATIVE   = re.compile(r"^-")
 
 # Date patterns — ordered most → least specific
 _DATE_PATTERNS = [
-    re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{4}\b"),                    # DD/MM/YYYY
-    re.compile(r"\b\d{4}[/-]\d{2}[/-]\d{2}\b"),                    # YYYY-MM-DD
-    re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{2}\b"),                    # DD/MM/YY
+    re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{4}(?!\d)"),                    # DD/MM/YYYY
+    re.compile(r"\b\d{4}[/-]\d{2}[/-]\d{2}(?!\d)"),                    # YYYY-MM-DD
+    re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{2}(?!\d)"),                    # DD/MM/YY
     re.compile(r"\b\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|"
                r"Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]*\d{2,4}\b",
                re.IGNORECASE),                                       # 12 Jan 2024
@@ -91,9 +91,29 @@ class NumericParser:
 
     @staticmethod
     def is_amount(text: str) -> bool:
-        """Return True if *text* looks like a monetary amount."""
+        """Return True if *text* strictly matches a monetary amount format."""
         t = text.strip()
         return bool(_AMOUNT_PATTERN.match(t)) and len(_CLEAN_AMOUNT.sub("", t)) >= 1
+
+    @staticmethod
+    def looks_like_number(text: str) -> bool:
+        """
+        Return True if *text* is predominantly numeric. 
+        Highly resilient to OCR noise (e.g., '8,000,00', '500.00*').
+        Used for spatial clustering rather than strict parsing.
+        """
+        t = text.strip()
+        # Remove common currency symbols and signs
+        t = re.sub(r"^[+-]?\s*(?:INR|Rs\.?|₹|USD|\$|EUR|€)?\s*", "", t, flags=re.IGNORECASE)
+        t = re.sub(r"\s*(?:CR|DR|Cr|Dr|cr|dr)$", "", t, flags=re.IGNORECASE)
+        
+        digits = sum(1 for c in t if c.isdigit())
+        if digits == 0:
+            return False
+            
+        # Allowed chars: digits, commas, periods, spaces, OCR artifacts
+        allowed = sum(1 for c in t if c.isdigit() or c in "., '")
+        return allowed / len(t) >= 0.7
 
     @staticmethod
     def is_date(text: str) -> bool:
@@ -192,6 +212,35 @@ class NumericParser:
         return None
 
     def clean_amount_str(self, text: str) -> Optional[float]:
-        """Parse and return the float value only, ignoring sign semantics."""
-        result = self.parse_amount(text)
-        return result[0] if result else None
+        """Parse and return the float value only, ignoring sign semantics, while healing OCR typos like 1,95.009.02"""
+        t = text.strip()
+        
+        # Remove trailing/leading text that isn't a digit, decimal, comma, or minus
+        t = re.sub(r"[^\d.,-]", "", t)
+        if not t:
+            return None
+            
+        is_negative = t.startswith("-")
+        t = t.lstrip("-")
+        
+        # Look for the true decimal separator (typically the LAST . or , followed by exactly 2 digits)
+        m = re.search(r"[,.](\d{2})$", t)
+        if m:
+            cents = m.group(1)
+            # Remove the cents and the delimiter
+            t = t[:-3]
+            # Remove all remaining . and , (treating them as thousands separators)
+            t = re.sub(r"[,.]", "", t)
+            t = f"{t}.{cents}"
+        else:
+            # Whole number or single decimal digit? Remove all . and , just to be safe
+            t = re.sub(r"[,.]", "", t)
+            
+        if not t:
+            return None
+            
+        try:
+            val = float(t)
+            return -val if is_negative else val
+        except ValueError:
+            return None

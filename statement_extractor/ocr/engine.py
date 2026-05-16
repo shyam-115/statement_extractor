@@ -287,7 +287,7 @@ class OCREngine:
                     normalized_x=cx / w,
                     normalized_y=cy / h,
                     page_num=page_num,
-                    is_numeric=self._numeric_parser.is_amount(text),
+                    is_numeric=self._numeric_parser.looks_like_number(text),
                     is_date=self._numeric_parser.is_date(text),
                 )
             )

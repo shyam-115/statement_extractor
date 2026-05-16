@@ -55,11 +55,12 @@ from typing import List, Optional
 from .config import ExtractorConfig
 from .ocr.engine import OCREngine
 from .grouping.row_grouper import RowGrouper
+from .grouping.table_segmenter import TableSegmenter
 from .clustering.column_detector import ColumnDetector
 from .parsing.header_inference import HeaderInference
 from .parsing.transaction_reconstructor import TransactionReconstructor
 from .validation.balance_validator import BalanceValidator
-from .schemas import ExtractionResult, LogicalRow, OCRToken, ColumnZone
+from .schemas import ExtractionResult, LogicalRow, OCRToken, ColumnZone, ExtractedTable
 from .utils.exporters import save_to_json, save_to_csv
 from .utils.debug_viz import DebugVisualizer
 
@@ -90,6 +91,7 @@ class StatementExtractor:
         logger.info("Initialising StatementExtractor …")
         self._ocr         = OCREngine(self.config.ocr)
         self._row_grouper = RowGrouper(self.config.row_grouping)
+        self._table_segmenter = TableSegmenter(self.config)
         self._col_detector = ColumnDetector(self.config.column_detection)
         self._header_inf  = HeaderInference(self.config.header_inference)
         self._reconstructor = TransactionReconstructor(self.config)
@@ -162,41 +164,126 @@ class StatementExtractor:
                 extraction_warnings=warnings,
             )
 
-        # ── Stage 3: Column detection ────────────────────────────────────
-        zones: List[ColumnZone] = self._col_detector.detect(all_rows)
-        if not zones:
-            warnings.append("Column detection produced no zones — output may be degraded")
+        # ── Stage 3-5: Per-table extraction ────────────────────────────────
+        all_transactions: List[Transaction] = []
+        all_extracted_tables: List[ExtractedTable] = []
+        page_zones: Dict[int, List[ColumnZone]] = {}
+        combined_mapping: Dict[str, str] = {}
 
-        # ── Stage 4: Header semantic inference ───────────────────────────
-        zones = self._header_inf.infer(zones, all_rows)
+        for page_num in range(total_pages):
+            page_rows = [r for r in all_rows if r.page_num == page_num]
+            if not page_rows:
+                page_zones[page_num] = []
+                continue
 
-        col_mapping = {
-            z.column_id: z.semantic_role for z in zones if z.semantic_role
-        }
-        logger.info("Column mapping: %s", col_mapping)
+            page_zones[page_num] = []
+            tables = self._table_segmenter.segment(page_rows)
 
-        # ── Stage 5: Transaction reconstruction ──────────────────────────
-        data_rows = [r for r in all_rows if not r.is_header]
-        transactions = self._reconstructor.reconstruct(data_rows, zones)
-        if not transactions:
-            warnings.append("No transactions reconstructed")
+            for table_idx, table_rows in enumerate(tables):
+                # 3. Column detection per table
+                zones = self._col_detector.detect(table_rows)
+                if not zones:
+                    warnings.append(f"Column detection produced no zones on page {page_num + 1}, table {table_idx + 1}")
+                    continue
+
+                # Dynamically calculate the format-agnostic absolute Y-boundaries for the visualizer
+                valid_rows = [r for r in table_rows if r.tokens]
+                if valid_rows:
+                    min_y = min(min(t.y1 for t in r.tokens) for r in valid_rows)
+                    max_y = max(max(t.y2 for t in r.tokens) for r in valid_rows)
+                else:
+                    min_y, max_y = 0.0, 0.0
+                    
+                for z in zones:
+                    z.top_boundary = min_y
+                    z.bottom_boundary = max_y
+
+                # 4. Header inference (pass ONLY table_rows to prevent header leakage across tables)
+                zones = self._header_inf.infer(zones, table_rows)
+                
+                col_mapping = {z.column_id: z.semantic_role for z in zones if z.semantic_role}
+                
+                # --- SAFE HEADER INHERITANCE ---
+                # If no headers were matched for this table, try to inherit from the last known transaction table
+                # This safely handles continuation pages without stealing headers from unrelated tables below it.
+                if not col_mapping and getattr(self, "_last_transaction_zones", None):
+                    for z in zones:
+                        for prev_z in self._last_transaction_zones:
+                            if abs(z.x_center - prev_z.x_center) < 0.05:
+                                z.semantic_role = prev_z.semantic_role
+                                z.header_text = prev_z.header_text
+                                break
+                    col_mapping = {z.column_id: z.semantic_role for z in zones if z.semantic_role}
+
+                page_zones[page_num].extend(zones)
+                
+                # --- BUILD GENERIC TABLE ---
+                table_headers = []
+                for z in zones:
+                    h_name = z.header_text or z.semantic_role or f"Column_{z.column_id}"
+                    table_headers.append(h_name)
+                    
+                data_rows = [r for r in table_rows if not r.is_header]
+                table_data_rows = []
+                for r in data_rows:
+                    row_dict = {h: [] for h in table_headers}
+                    for token in r.tokens:
+                        col_id = self._col_detector.assign_token_to_column(token, zones)
+                        if col_id >= 0:
+                            for z, h_name in zip(zones, table_headers):
+                                if z.column_id == col_id:
+                                    row_dict[h_name].append(token.text)
+                                    break
+                    row_dict = {k: " ".join(v) for k, v in row_dict.items()}
+                    table_data_rows.append(row_dict)
+                    
+                table_id_str = f"p{page_num + 1}_t{table_idx + 1}"
+                all_extracted_tables.append(ExtractedTable(
+                    table_id=table_id_str,
+                    headers=table_headers,
+                    rows=table_data_rows
+                ))
+
+                # --- TRANSACTION FILTERING ---
+                roles_found = set(col_mapping.values())
+                has_date = "date" in roles_found
+                has_amount = bool({"debit", "credit", "balance"}.intersection(roles_found))
+                # Stricter requirement: A true transaction table must also have a narration/description column
+                # This prevents Fixed Deposit tables from accidentally passing
+                has_narration = "narration" in roles_found
+                
+                if has_date and has_amount and has_narration:
+                    logger.info("%s identified as TRANSACTION table (roles: %s)", table_id_str, col_mapping)
+                    for k, v in col_mapping.items():
+                        combined_mapping[f"{table_id_str}_col{k}"] = v
+                        
+                    self._last_transaction_zones = zones
+                    table_txns = self._reconstructor.reconstruct(data_rows, zones)
+                    all_transactions.extend(table_txns)
+                else:
+                    logger.debug("%s skipped (not a transaction table, saving as generic)", table_id_str)
+
+        if not all_transactions and not all_extracted_tables:
+            warnings.append("No data reconstructed")
             return ExtractionResult(
                 source_file=file_path,
                 total_pages=total_pages,
-                column_mapping=col_mapping,
+                column_mapping=combined_mapping,
                 extraction_warnings=warnings,
             )
 
-        logger.info("Reconstructed %d raw transactions", len(transactions))
+        logger.info("Reconstructed %d raw transactions and %d generic tables across %d page(s)", 
+                    len(all_transactions), len(all_extracted_tables), total_pages)
 
         # ── Stage 6: Balance validation ───────────────────────────────────
-        transactions = self._validator.validate(transactions)
+        transactions = self._validator.validate(all_transactions)
 
         # ── Stage 7: Debug re-render with zones ───────────────────────────
         if self._visualizer:
             for page_num, tokens in enumerate(tokens_per_page):
                 if page_num < len(images):
                     page_rows = [r for r in all_rows if r.page_num == page_num]
+                    zones = page_zones.get(page_num, [])
                     try:
                         self._visualizer.render_page(
                             images[page_num], tokens, page_rows, zones, page_num
@@ -206,10 +293,11 @@ class StatementExtractor:
 
         result = ExtractionResult(
             transactions=transactions,
+            extracted_tables=all_extracted_tables,
             total_pages=total_pages,
             source_file=str(Path(file_path).resolve()),
             extraction_warnings=warnings,
-            column_mapping={str(k): str(v) for k, v in col_mapping.items()},
+            column_mapping=combined_mapping,
         )
 
         logger.info(
