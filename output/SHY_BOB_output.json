@@ -1,0 +1,1589 @@
+{
+  "schema_version": 1,
+  "source_file": "/home/harsh/Downloads/statement_extractor/input/SHY_BOB.pdf",
+  "total_pages": 4,
+  "total_transactions": 66,
+  "total_extracted_tables": 7,
+  "column_mapping": {
+    "p1_t2_col0": "date",
+    "p1_t2_col1": "debit",
+    "p1_t2_col2": "credit",
+    "p1_t2_col3": "balance",
+    "p2_t2_col0": "date",
+    "p2_t2_col1": "debit",
+    "p2_t2_col2": "credit",
+    "p2_t2_col4": "balance",
+    "p3_t2_col0": "date",
+    "p3_t2_col1": "debit",
+    "p3_t2_col2": "credit",
+    "p3_t2_col3": "balance"
+  },
+  "extraction_warnings": [
+    "Column detection produced no zones on page 2, table 1",
+    "Column detection produced no zones on page 3, table 1",
+    "Column detection produced no zones on page 3, table 3",
+    "Column detection produced no zones on page 3, table 4",
+    "Column detection produced no zones on page 4, table 1",
+    "Column detection produced no zones on page 4, table 2"
+  ],
+  "extracted_tables": [
+    {
+      "table_id": "p1_t1",
+      "headers": [
+        "debit",
+        "balance"
+      ],
+      "rows": [
+        {
+          "debit": "",
+          "balance": ""
+        },
+        {
+          "debit": "",
+          "balance": ""
+        },
+        {
+          "debit": "",
+          "balance": ""
+        },
+        {
+          "debit": "Assets",
+          "balance": "Liabilities"
+        },
+        {
+          "debit": "54619.31",
+          "balance": "0.00"
+        },
+        {
+          "debit": "54619.31",
+          "balance": "0.00"
+        }
+      ],
+      "region_type": "noise"
+    },
+    {
+      "table_id": "p1_t2",
+      "headers": [
+        "UMARETIYA SHYAM BHARATBHAI DATE",
+        "WITHDRAWAL (DR)",
+        "SAVINGS ACCOUNT - DEPOSIT (CR)",
+        "38760100018143 BALANCE"
+      ],
+      "rows": [
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "01-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "54032.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "02-04-2026",
+          "WITHDRAWAL (DR)": "270.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "53762.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "02-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "4000.00",
+          "38760100018143 BALANCE": "57762.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "05-04-2026",
+          "WITHDRAWAL (DR)": "280.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "57482.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "05-04-2026",
+          "WITHDRAWAL (DR)": "449.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "57033.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "05-04-2026",
+          "WITHDRAWAL (DR)": "89.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "56944.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "05-04-2026",
+          "WITHDRAWAL (DR)": "200.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "56744.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "06-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "449.00",
+          "38760100018143 BALANCE": "57193.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "08-04-2026",
+          "WITHDRAWAL (DR)": "100.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "57093.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "08-04-2026",
+          "WITHDRAWAL (DR)": "160.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "56933.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "09-04-2026",
+          "WITHDRAWAL (DR)": "100.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "56833.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "09-04-2026",
+          "WITHDRAWAL (DR)": "150.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "56683.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "10-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "40.00",
+          "38760100018143 BALANCE": "56723.47 Cr"
+        },
+        {
+          "UMARETIYA SHYAM BHARATBHAI DATE": "10-04-2026",
+          "WITHDRAWAL (DR)": "70.00",
+          "SAVINGS ACCOUNT - DEPOSIT (CR)": "",
+          "38760100018143 BALANCE": "56653.47 Cr"
+        }
+      ],
+      "region_type": "bank_transactions"
+    },
+    {
+      "table_id": "p1_t3",
+      "headers": [
+        "balance"
+      ],
+      "rows": [
+        {
+          "balance": "Page  1  |  4"
+        },
+        {
+          "balance": "1800 5700"
+        },
+        {
+          "balance": "1800 5000"
+        }
+      ],
+      "region_type": "metadata_table"
+    },
+    {
+      "table_id": "p2_t2",
+      "headers": [
+        "DATE",
+        "WITHDRAWAL (DR)",
+        "DEPOSIT (CR)",
+        "Column_3",
+        "BALANCE"
+      ],
+      "rows": [
+        {
+          "DATE": "12-04-2026",
+          "WITHDRAWAL (DR)": "255.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "56398.47 Cr"
+        },
+        {
+          "DATE": "13-04-2026",
+          "WITHDRAWAL (DR)": "36.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "56362.47 Cr"
+        },
+        {
+          "DATE": "13-04-2026",
+          "WITHDRAWAL (DR)": "40.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "56322.47 Cr"
+        },
+        {
+          "DATE": "13-04-2026",
+          "WITHDRAWAL (DR)": "105.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "56217.47 Cr"
+        },
+        {
+          "DATE": "13-04-2026",
+          "WITHDRAWAL (DR)": "290.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55927.47 Cr"
+        },
+        {
+          "DATE": "13-04-2026",
+          "WITHDRAWAL (DR)": "40.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55887.47 Cr"
+        },
+        {
+          "DATE": "13-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "121.00",
+          "Column_3": "",
+          "BALANCE": "56008.47 Cr"
+        },
+        {
+          "DATE": "14-04-2026",
+          "WITHDRAWAL (DR)": "160.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55848.47 Cr"
+        },
+        {
+          "DATE": "14-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "80.00",
+          "Column_3": "",
+          "BALANCE": "55928.47 Cr"
+        },
+        {
+          "DATE": "15-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "150.00",
+          "Column_3": "",
+          "BALANCE": "56078.47 Cr"
+        },
+        {
+          "DATE": "15-04-2026",
+          "WITHDRAWAL (DR)": "243.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55835.47 Cr"
+        },
+        {
+          "DATE": "16-04-2026",
+          "WITHDRAWAL (DR)": "180.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55655.47 Cr"
+        },
+        {
+          "DATE": "16-04-2026",
+          "WITHDRAWAL (DR)": "160.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55495.47 Cr"
+        },
+        {
+          "DATE": "17-04-2026",
+          "WITHDRAWAL (DR)": "35.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55460.47 Cr"
+        },
+        {
+          "DATE": "18-04-2026",
+          "WITHDRAWAL (DR)": "120.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55340.47 Cr"
+        },
+        {
+          "DATE": "19-04-2026",
+          "WITHDRAWAL (DR)": "0.24",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55340.23 Cr"
+        },
+        {
+          "DATE": "19-04-2026",
+          "WITHDRAWAL (DR)": "35.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55305.23 Cr"
+        },
+        {
+          "DATE": "19-04-2026",
+          "WITHDRAWAL (DR)": "100.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "55205.23 Cr"
+        },
+        {
+          "DATE": "19-04-2026",
+          "WITHDRAWAL (DR)": "230.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "54975.23 Cr"
+        },
+        {
+          "DATE": "20-04-2026",
+          "WITHDRAWAL (DR)": "112.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "54863.23 Cr"
+        },
+        {
+          "DATE": "22-04-2026",
+          "WITHDRAWAL (DR)": "430.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "54433.23 Cr"
+        },
+        {
+          "DATE": "22-04-2026",
+          "WITHDRAWAL (DR)": "94.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "54339.23 Cr"
+        },
+        {
+          "DATE": "24-04-2026",
+          "WITHDRAWAL (DR)": "300.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "54039.23 Cr"
+        },
+        {
+          "DATE": "24-04-2026",
+          "WITHDRAWAL (DR)": "23.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "54016.23 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "80.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "53936.23 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "100.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "53836.23 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "30.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "53806.23 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "86.52",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "53719.71 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "117.00",
+          "Column_3": "",
+          "BALANCE": "53836.71 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "3500.00",
+          "Column_3": "",
+          "BALANCE": "57336.71 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "140.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "57196.71 Cr"
+        },
+        {
+          "DATE": "25-04-2026",
+          "WITHDRAWAL (DR)": "40.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "57156.71 Cr"
+        },
+        {
+          "DATE": "26-04-2026",
+          "WITHDRAWAL (DR)": "185.00",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "56971.71 Cr"
+        },
+        {
+          "DATE": "",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "",
+          "Column_3": "",
+          "BALANCE": "Page  2  |  4"
+        },
+        {
+          "DATE": "",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "",
+          "Column_3": "1800 5700",
+          "BALANCE": ""
+        },
+        {
+          "DATE": "",
+          "WITHDRAWAL (DR)": "1930",
+          "DEPOSIT (CR)": "Customer Care",
+          "Column_3": "1800 5000",
+          "BALANCE": ""
+        }
+      ],
+      "region_type": "bank_transactions"
+    },
+    {
+      "table_id": "p3_t2",
+      "headers": [
+        "DATE",
+        "WITHDRAWAL (DR)",
+        "DEPOSIT (CR)",
+        "BALANCE"
+      ],
+      "rows": [
+        {
+          "DATE": "26-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "45.00",
+          "BALANCE": "57016.71 Cr"
+        },
+        {
+          "DATE": "26-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "55.00",
+          "BALANCE": "57071.71 Cr"
+        },
+        {
+          "DATE": "26-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "6.00",
+          "BALANCE": "57077.71 Cr"
+        },
+        {
+          "DATE": "26-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "2.00",
+          "BALANCE": "57079.71 Cr"
+        },
+        {
+          "DATE": "26-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "3.00",
+          "BALANCE": "57082.71 Cr"
+        },
+        {
+          "DATE": "26-04-2026",
+          "WITHDRAWAL (DR)": "200.00",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "56882.71 Cr"
+        },
+        {
+          "DATE": "27-04-2026",
+          "WITHDRAWAL (DR)": "1598.60",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "55284.11 Cr"
+        },
+        {
+          "DATE": "28-04-2026",
+          "WITHDRAWAL (DR)": "276.00",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "55008.11 Cr"
+        },
+        {
+          "DATE": "29-04-2026",
+          "WITHDRAWAL (DR)": "50.00",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "54958.11 Cr"
+        },
+        {
+          "DATE": "29-04-2026",
+          "WITHDRAWAL (DR)": "70.00",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "54888.11 Cr"
+        },
+        {
+          "DATE": "29-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "20.00",
+          "BALANCE": "54908.11 Cr"
+        },
+        {
+          "DATE": "30-04-2026",
+          "WITHDRAWAL (DR)": "58.80",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "54849.31 Cr"
+        },
+        {
+          "DATE": "30-04-2026",
+          "WITHDRAWAL (DR)": "80.00",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "54769.31 Cr"
+        },
+        {
+          "DATE": "30-04-2026",
+          "WITHDRAWAL (DR)": "50.00",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "54719.31 Cr"
+        },
+        {
+          "DATE": "30-04-2026",
+          "WITHDRAWAL (DR)": "100.00",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "54619.31 Cr"
+        },
+        {
+          "DATE": "30-04-2026",
+          "WITHDRAWAL (DR)": "",
+          "DEPOSIT (CR)": "",
+          "BALANCE": "54619.31 Cr"
+        }
+      ],
+      "region_type": "bank_transactions"
+    },
+    {
+      "table_id": "p3_t5",
+      "headers": [
+        "balance"
+      ],
+      "rows": [
+        {
+          "balance": "Page  3  |  4"
+        },
+        {
+          "balance": "1800 5700"
+        },
+        {
+          "balance": "1800 5000"
+        }
+      ],
+      "region_type": "metadata_table"
+    },
+    {
+      "table_id": "p4_t3",
+      "headers": [
+        "balance"
+      ],
+      "rows": [
+        {
+          "balance": "Page  4  |  4"
+        },
+        {
+          "balance": "1800 5700"
+        },
+        {
+          "balance": "1800 5000"
+        }
+      ],
+      "region_type": "metadata_table"
+    }
+  ],
+  "transactions": [
+    {
+      "transaction_date": "01-04-2026",
+      "description": "Opening Balance",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": 54032.47,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.8681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01-04-2026 Opening Balance 54032.47 Cr"
+    },
+    {
+      "transaction_date": "02-04-2026",
+      "description": "65.augp UPI/120931185007/21:47:04/UPI/merchant9059",
+      "reference_no": "120931185007",
+      "debit": 270.0,
+      "credit": null,
+      "balance": 53762.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "02-04-2026 65.augp UPI/120931185007/21:47:04/UPI/merchant9059 270.00 53762.47 Cr"
+    },
+    {
+      "transaction_date": "02-04-2026",
+      "description": "TECHNOLOGY PRIVA NEFT-IN22609104902015-NEXTBILLION",
+      "reference_no": "IN22609104902015",
+      "debit": null,
+      "credit": 4000.0,
+      "balance": 57762.47,
+      "tx_type": "NEFT",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "02-04-2026 TECHNOLOGY PRIVA NEFT-IN22609104902015-NEXTBILLION 4000.00 57762.47 Cr"
+    },
+    {
+      "transaction_date": "05-04-2026",
+      "description": "206@oks UPI/646166027038/14:14:48/UPI/harshkatba83",
+      "reference_no": "646166027038",
+      "debit": 280.0,
+      "credit": null,
+      "balance": 57482.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "05-04-2026 206@oks UPI/646166027038/14:14:48/UPI/harshkatba83 280.00 57482.47 Cr"
+    },
+    {
+      "transaction_date": "05-04-2026",
+      "description": "@axisb UPI/345320800956/14:46:22/UPI/playstore1.bd",
+      "reference_no": "345320800956",
+      "debit": 449.0,
+      "credit": null,
+      "balance": 57033.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "05-04-2026 @axisb UPI/345320800956/14:46:22/UPI/playstore1.bd 449.00 57033.47 Cr"
+    },
+    {
+      "transaction_date": "05-04-2026",
+      "description": "ci/UPI UPI/121135367987/20:06:48/UPI/upiswiggy@ici",
+      "reference_no": "121135367987",
+      "debit": 89.0,
+      "credit": null,
+      "balance": 56944.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "05-04-2026 ci/UPI UPI/121135367987/20:06:48/UPI/upiswiggy@ici 89.00 56944.47 Cr"
+    },
+    {
+      "transaction_date": "05-04-2026",
+      "description": "n@ptys UPI/121136646205/20:23:42/UPI/paytmqr5zoc6",
+      "reference_no": "121136646205",
+      "debit": 200.0,
+      "credit": null,
+      "balance": 56744.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "05-04-2026 n@ptys/ UPI/121136646205/20:23:42/UPI/paytmqr5zoc6 200.00 56744.47 Cr"
+    },
+    {
+      "transaction_date": "06-04-2026",
+      "description": "@axisb UPI/463734380966/06:43:23/UPI/playstore1.bd",
+      "reference_no": "463734380966",
+      "debit": null,
+      "credit": 449.0,
+      "balance": 57193.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "06-04-2026 @axisb UPI/463734380966/06:43:23/UPI/playstore1.bd 449.00 57193.47 Cr"
+    },
+    {
+      "transaction_date": "08-04-2026",
+      "description": "n24-1@ UPI/646430386360/11:48:13/UPI/kakadiyalakha",
+      "reference_no": "646430386360",
+      "debit": 100.0,
+      "credit": null,
+      "balance": 57093.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "08-04-2026 n24-1@ UPI/646430386360/11:48:13/UPI/kakadiyalakha 100.00 57093.47 Cr"
+    },
+    {
+      "transaction_date": "08-04-2026",
+      "description": "km@ptys UPI/121291225836/20:12:55/UPI/paytmqr5wrd",
+      "reference_no": "121291225836",
+      "debit": 160.0,
+      "credit": null,
+      "balance": 56933.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "08-04-2026 km@ptys/ UPI/121291225836/20:12:55/UPI/paytmqr5wrd 160.00 56933.47 Cr"
+    },
+    {
+      "transaction_date": "09-04-2026",
+      "description": "ybl/UPI UPI/121311756841/11:04:52/UPI/q499476765@",
+      "reference_no": "121311756841",
+      "debit": 100.0,
+      "credit": null,
+      "balance": 56833.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "09-04-2026 ybl/UPI UPI/121311756841/11:04:52/UPI/q499476765@ 100.00 56833.47 Cr"
+    },
+    {
+      "transaction_date": "09-04-2026",
+      "description": "ybl/UPI UPI/121343220028/20:06:10/UPI/q667511951@",
+      "reference_no": "121343220028",
+      "debit": 150.0,
+      "credit": null,
+      "balance": 56683.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "09-04-2026 ybl/UPI UPI/121343220028/20:06:10/UPI/q667511951@ 150.00 56683.47 Cr"
+    },
+    {
+      "transaction_date": "10-04-2026",
+      "description": "ya268@ UPI/610014236144/20:06:17/UPI/vanshvanapari",
+      "reference_no": "610014236144",
+      "debit": null,
+      "credit": 40.0,
+      "balance": 56723.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "10-04-2026 ya268@ UPI/610014236144/20:06:17/UPI/vanshvanapari 40.00 56723.47 Cr"
+    },
+    {
+      "transaction_date": "10-04-2026",
+      "description": "@okaxi UPI/121396757254/20:21:07/UPI/harshtejani06",
+      "reference_no": "121396757254",
+      "debit": 70.0,
+      "credit": null,
+      "balance": 56653.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9681,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "10-04-2026 @okaxi UPI/121396757254/20:21:07/UPI/harshtejani06 70.00 56653.47 Cr"
+    },
+    {
+      "transaction_date": "12-04-2026",
+      "description": "a2@o UPI/610274513412/21:03:04/UPI/takshilkathiriy",
+      "reference_no": "610274513412",
+      "debit": 255.0,
+      "credit": null,
+      "balance": 56398.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "12-04-2026 a2@o UPI/610274513412/21:03:04/UPI/takshilkathiriy 255.00 56398.47 Cr"
+    },
+    {
+      "transaction_date": "13-04-2026",
+      "description": "ybl/UPI UPI/121526015225/12:17:34/UPI/q409832152@",
+      "reference_no": "121526015225",
+      "debit": 36.0,
+      "credit": null,
+      "balance": 56362.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "13-04-2026 ybl/UPI UPI/121526015225/12:17:34/UPI/q409832152@ 36.00 56362.47 Cr"
+    },
+    {
+      "transaction_date": "13-04-2026",
+      "description": "@pty/U UPI/121526192466/12:20:59/UPI/paytm.s1vj5qd",
+      "reference_no": "121526192466",
+      "debit": 40.0,
+      "credit": null,
+      "balance": 56322.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "13-04-2026 @pty/U UPI/121526192466/12:20:59/UPI/paytm.s1vj5qd 40.00 56322.47 Cr"
+    },
+    {
+      "transaction_date": "13-04-2026",
+      "description": "8058@ok UPI/121552265008/19:53:22/UPI/gpay-1219080",
+      "reference_no": "121552265008",
+      "debit": 105.0,
+      "credit": null,
+      "balance": 56217.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "13-04-2026 8058@ok UPI/121552265008/19:53:22/UPI/gpay-1219080 105.00 56217.47 Cr"
+    },
+    {
+      "transaction_date": "13-04-2026",
+      "description": "okbizaxi UPI/121555280629/20:31:39/UPI/8866800785@",
+      "reference_no": "121555280629",
+      "debit": 290.0,
+      "credit": null,
+      "balance": 55927.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "13-04-2026 okbizaxi UPI/121555280629/20:31:39/UPI/8866800785@ 290.00 55927.47 Cr"
+    },
+    {
+      "transaction_date": "13-04-2026",
+      "description": "ybl/UPI UPI/121556140410/20:42:59/UPI/q399128603@",
+      "reference_no": "121556140410",
+      "debit": 40.0,
+      "credit": null,
+      "balance": 55887.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "13-04-2026 ybl/UPI UPI/121556140410/20:42:59/UPI/q399128603@ 40.00 55887.47 Cr"
+    },
+    {
+      "transaction_date": "13-04-2026",
+      "description": "a2@o UPI/646999204983/20:47:25/UPI/takshilkathiriy",
+      "reference_no": "646999204983",
+      "debit": null,
+      "credit": 121.0,
+      "balance": 56008.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "13-04-2026 a2@o UPI/646999204983/20:47:25/UPI/takshilkathiriy 121.00 56008.47 Cr"
+    },
+    {
+      "transaction_date": "14-04-2026",
+      "description": "ybl/UPI UPI/121603266617/19:55:43/UPI/q231591797@",
+      "reference_no": "121603266617",
+      "debit": 160.0,
+      "credit": null,
+      "balance": 55848.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "14-04-2026 ybl/UPI UPI/121603266617/19:55:43/UPI/q231591797@ 160.00 55848.47 Cr"
+    },
+    {
+      "transaction_date": "14-04-2026",
+      "description": "a2@o UPI/647074689069/20:00:47/UPI/takshilkathiriy",
+      "reference_no": "647074689069",
+      "debit": null,
+      "credit": 80.0,
+      "balance": 55928.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "14-04-2026 a2@o UPI/647074689069/20:00:47/UPI/takshilkathiriy 80.00 55928.47 Cr"
+    },
+    {
+      "transaction_date": "15-04-2026",
+      "description": "ya268@ UPI/610515048206/14:24:36/UPI/vanshvanapari",
+      "reference_no": "610515048206",
+      "debit": null,
+      "credit": 150.0,
+      "balance": 56078.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "15-04-2026 ya268@ UPI/610515048206/14:24:36/UPI/vanshvanapari 150.00 56078.47 Cr"
+    },
+    {
+      "transaction_date": "15-04-2026",
+      "description": "ybl/UPI UPI/121660805025/21:31:41/UPI/8460475954@",
+      "reference_no": "121660805025",
+      "debit": 243.0,
+      "credit": null,
+      "balance": 55835.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "15-04-2026 ybl/UPI UPI/121660805025/21:31:41/UPI/8460475954@ 243.00 55835.47 Cr"
+    },
+    {
+      "transaction_date": "16-04-2026",
+      "description": "ybl/UPI UPI/647211214216/09:16:40/UPI/q231591797@",
+      "reference_no": "647211214216",
+      "debit": 180.0,
+      "credit": null,
+      "balance": 55655.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "16-04-2026 ybl/UPI UPI/647211214216/09:16:40/UPI/q231591797@ 180.00 55655.47 Cr"
+    },
+    {
+      "transaction_date": "16-04-2026",
+      "description": "ybl/UPI UPI/647239869733/20:20:40/UPI/9712944385@",
+      "reference_no": "647239869733",
+      "debit": 160.0,
+      "credit": null,
+      "balance": 55495.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "16-04-2026 ybl/UPI UPI/647239869733/20:20:40/UPI/9712944385@ 160.00 55495.47 Cr"
+    },
+    {
+      "transaction_date": "17-04-2026",
+      "description": "ybl/UPI UPI/121723891129/09:55:07/UPI/q231591797@",
+      "reference_no": "121723891129",
+      "debit": 35.0,
+      "credit": null,
+      "balance": 55460.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "17-04-2026 ybl/UPI UPI/121723891129/09:55:07/UPI/q231591797@ 35.00 55460.47 Cr"
+    },
+    {
+      "transaction_date": "18-04-2026",
+      "description": "upi/UPI UPI/647461905289/12:34:24/UPI/7600958282@",
+      "reference_no": "647461905289",
+      "debit": 120.0,
+      "credit": null,
+      "balance": 55340.47,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "18-04-2026 upi/UPI UPI/647461905289/12:34:24/UPI/7600958282@ 120.00 55340.47 Cr"
+    },
+    {
+      "transaction_date": "19-04-2026",
+      "description": "SMS Charges for MAR 26",
+      "reference_no": "",
+      "debit": 0.24,
+      "credit": null,
+      "balance": 55340.23,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "19-04-2026 SMS Charges for MAR 26 0.24 55340.23 Cr"
+    },
+    {
+      "transaction_date": "19-04-2026",
+      "description": "okbizaxi UPI/121829910842/10:39:25/UPI/9714276721@",
+      "reference_no": "121829910842",
+      "debit": 35.0,
+      "credit": null,
+      "balance": 55305.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "19-04-2026 okbizaxi UPI/121829910842/10:39:25/UPI/9714276721@ 35.00 55305.23 Cr"
+    },
+    {
+      "transaction_date": "19-04-2026",
+      "description": "00380066 UPI/610992651745/19:22:49/UPI/mab.0373250",
+      "reference_no": "610992651745",
+      "debit": 100.0,
+      "credit": null,
+      "balance": 55205.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "19-04-2026 00380066 UPI/610992651745/19:22:49/UPI/mab.0373250 100.00 55205.23 Cr"
+    },
+    {
+      "transaction_date": "19-04-2026",
+      "description": "upi/UPI UPI/610911261082/20:12:54/UPI/6354054536@",
+      "reference_no": "610911261082",
+      "debit": 230.0,
+      "credit": null,
+      "balance": 54975.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "19-04-2026 upi/UPI UPI/610911261082/20:12:54/UPI/6354054536@ 230.00 54975.23 Cr"
+    },
+    {
+      "transaction_date": "20-04-2026",
+      "description": "203@ok UPI/121910184765/20:20:15/UPI/chovatiyahet2",
+      "reference_no": "121910184765",
+      "debit": 112.0,
+      "credit": null,
+      "balance": 54863.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "20-04-2026 203@ok UPI/121910184765/20:20:15/UPI/chovatiyahet2 112.00 54863.23 Cr"
+    },
+    {
+      "transaction_date": "22-04-2026",
+      "description": "ps.8214 UPI/122009342557/20:37:41/UPI/cheeseandchi",
+      "reference_no": "122009342557",
+      "debit": 430.0,
+      "credit": null,
+      "balance": 54433.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "22-04-2026 ps.8214 UPI/122009342557/20:37:41/UPI/cheeseandchi 430.00 54433.23 Cr"
+    },
+    {
+      "transaction_date": "22-04-2026",
+      "description": "n24@ok UPI/647897415623/21:21:30/UPI/kakadiyalakha",
+      "reference_no": "647897415623",
+      "debit": 94.0,
+      "credit": null,
+      "balance": 54339.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "22-04-2026 n24@ok UPI/647897415623/21:21:30/UPI/kakadiyalakha 94.00 54339.23 Cr"
+    },
+    {
+      "transaction_date": "24-04-2026",
+      "description": "ybl/UPI UPI/122103179288/20:06:50/UPI/q403497786@",
+      "reference_no": "122103179288",
+      "debit": 300.0,
+      "credit": null,
+      "balance": 54039.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "24-04-2026 ybl/UPI UPI/122103179288/20:06:50/UPI/q403497786@ 300.00 54039.23 Cr"
+    },
+    {
+      "transaction_date": "24-04-2026",
+      "description": "okbizaxi UPI/122104216781/20:20:27/UPI/9714276721@",
+      "reference_no": "122104216781",
+      "debit": 23.0,
+      "credit": null,
+      "balance": 54016.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "24-04-2026 okbizaxi UPI/122104216781/20:20:27/UPI/9714276721@ 23.00 54016.23 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "@pty/U UPI/122122984795/10:47:00/UPI/paytm.s18llft",
+      "reference_no": "122122984795",
+      "debit": 80.0,
+      "credit": null,
+      "balance": 53936.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 @pty/U UPI/122122984795/10:47:00/UPI/paytm.s18llft 80.00 53936.23 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "@pty/U UPI/122123982419/11:07:41/UPI/paytm.s22givi",
+      "reference_no": "122123982419",
+      "debit": 100.0,
+      "credit": null,
+      "balance": 53836.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 @pty/U UPI/122123982419/11:07:41/UPI/paytm.s22givi 100.00 53836.23 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "d0w0j7p UPI/122124099764/11:10:05/UPI/bharatpe.9a0",
+      "reference_no": "122124099764",
+      "debit": 30.0,
+      "credit": null,
+      "balance": 53806.23,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 d0w0j7p UPI/122124099764/11:10:05/UPI/bharatpe.9a0 30.00 53806.23 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "63-01@ji UPI/122124598305/11:20:10/UPI/24151476573",
+      "reference_no": "",
+      "debit": 86.52,
+      "credit": null,
+      "balance": 53719.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 63-01@ji UPI/122124598305/11:20:10/UPI/24151476573 86.52 53719.71 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "@okhdf UPI/122138668560/16:19:49/UPI/dhruvilm.2612",
+      "reference_no": "122138668560",
+      "debit": null,
+      "credit": 117.0,
+      "balance": 53836.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 @okhdf UPI/122138668560/16:19:49/UPI/dhruvilm.2612 117.00 53836.71 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "hdfc/UPI UPI/611531579819/18:52:12/UPI/9737407942@",
+      "reference_no": "611531579819",
+      "debit": null,
+      "credit": 3500.0,
+      "balance": 57336.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 hdfc/UPI UPI/611531579819/18:52:12/UPI/9737407942@ 3500.00 57336.71 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "51671@yb UPI/122154176186/20:21:13/UPI/23211100100",
+      "reference_no": "",
+      "debit": 140.0,
+      "credit": null,
+      "balance": 57196.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 51671@yb UPI/122154176186/20:21:13/UPI/23211100100 140.00 57196.71 Cr"
+    },
+    {
+      "transaction_date": "25-04-2026",
+      "description": "ybl/UPI UPI/122154697557/20:28:13/UPI/q339025675@",
+      "reference_no": "122154697557",
+      "debit": 40.0,
+      "credit": null,
+      "balance": 57156.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "25-04-2026 ybl/UPI UPI/122154697557/20:28:13/UPI/q339025675@ 40.00 57156.71 Cr"
+    },
+    {
+      "transaction_date": "26-04-2026",
+      "description": "ybl/UPI UPI/122174783234/11:07:22/UPI/q231591797@",
+      "reference_no": "122174783234",
+      "debit": 185.0,
+      "credit": null,
+      "balance": 56971.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "26-04-2026 ybl/UPI UPI/122174783234/11:07:22/UPI/q231591797@ 185.00 56971.71 Cr"
+    },
+    {
+      "transaction_date": null,
+      "description": "Page  2  |  4",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.4675,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "Page  2  |  4"
+    },
+    {
+      "transaction_date": null,
+      "description": "1800 5700",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": 18005700.0,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.6175,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "1800 5700"
+    },
+    {
+      "transaction_date": null,
+      "description": "https://www.bankofbaroda.bank.in Cyber Crime Helpline 1800 5000",
+      "reference_no": "",
+      "debit": 1930.0,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6175,
+      "validation_status": "needs_review",
+      "page_num": 1,
+      "raw_text": "https://www.bankofbaroda.bank.in Cyber Crime Helpline 1930 Customer Care 1800 5000"
+    },
+    {
+      "transaction_date": "26-04-2026",
+      "description": "n24@ok UPI/648261493042/11:11:13/UPI/kakadiyalakha",
+      "reference_no": "648261493042",
+      "debit": null,
+      "credit": 45.0,
+      "balance": 57016.71,
+      "tx_type": "UPI",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "26-04-2026 n24@ok UPI/648261493042/11:11:13/UPI/kakadiyalakha 45.00 57016.71 Cr"
+    },
+    {
+      "transaction_date": "26-04-2026",
+      "description": "nyes/Pai UPI/001928461327/11:15:49/UPI/9313178100@",
+      "reference_no": "001928461327",
+      "debit": null,
+      "credit": 55.0,
+      "balance": 57071.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "26-04-2026 nyes/Pai UPI/001928461327/11:15:49/UPI/9313178100@ 55.00 57071.71 Cr"
+    },
+    {
+      "transaction_date": "26-04-2026",
+      "description": "s@axisb UPI/790987951166/21:07:23/UPI/goog-payment",
+      "reference_no": "790987951166",
+      "debit": null,
+      "credit": 6.0,
+      "balance": 57077.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "26-04-2026 s@axisb UPI/790987951166/21:07:23/UPI/goog-payment 6.00 57077.71 Cr"
+    },
+    {
+      "transaction_date": "26-04-2026",
+      "description": "s@axisb UPI/791038481166/21:07:32/UPI/goog-payment",
+      "reference_no": "791038481166",
+      "debit": null,
+      "credit": 2.0,
+      "balance": 57079.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "26-04-2026 s@axisb UPI/791038481166/21:07:32/UPI/goog-payment 2.00 57079.71 Cr"
+    },
+    {
+      "transaction_date": "26-04-2026",
+      "description": "s@axisb UPI/791041321166/21:07:37/UPI/goog-payment",
+      "reference_no": "791041321166",
+      "debit": null,
+      "credit": 3.0,
+      "balance": 57082.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "26-04-2026 s@axisb UPI/791041321166/21:07:37/UPI/goog-payment 3.00 57082.71 Cr"
+    },
+    {
+      "transaction_date": "26-04-2026",
+      "description": "203@ok UPI/611613651389/21:13:29/UPI/chovatiyahet2",
+      "reference_no": "611613651389",
+      "debit": 200.0,
+      "credit": null,
+      "balance": 56882.71,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "26-04-2026 203@ok UPI/611613651389/21:13:29/UPI/chovatiyahet2 200.00 56882.71 Cr"
+    },
+    {
+      "transaction_date": "27-04-2026",
+      "description": "NO REM UPI/184602437152/18:46:03/UPI/bdpg2.ir@sbi",
+      "reference_no": "184602437152",
+      "debit": 1598.6,
+      "credit": null,
+      "balance": 55284.11,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "27-04-2026 NO REM UPI/184602437152/18:46:03/UPI/bdpg2.ir@sbi/ 1598.60 55284.11 Cr"
+    },
+    {
+      "transaction_date": "28-04-2026",
+      "description": "c@ptys UPI/122298599378/20:11:02/UPI/paytmqr5zsvv",
+      "reference_no": "122298599378",
+      "debit": 276.0,
+      "credit": null,
+      "balance": 55008.11,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "28-04-2026 c@ptys/ UPI/122298599378/20:11:02/UPI/paytmqr5zsvv 276.00 55008.11 Cr"
+    },
+    {
+      "transaction_date": "29-04-2026",
+      "description": "ybl/UPI UPI/122314536343/09:41:37/UPI/q231591797@",
+      "reference_no": "122314536343",
+      "debit": 50.0,
+      "credit": null,
+      "balance": 54958.11,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "29-04-2026 ybl/UPI UPI/122314536343/09:41:37/UPI/q231591797@ 50.00 54958.11 Cr"
+    },
+    {
+      "transaction_date": "29-04-2026",
+      "description": "2@ptys UPI/122344726991/19:47:02/UPI/paytm-891684",
+      "reference_no": "122344726991",
+      "debit": 70.0,
+      "credit": null,
+      "balance": 54888.11,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "29-04-2026 2@ptys/ UPI/122344726991/19:47:02/UPI/paytm-891684 70.00 54888.11 Cr"
+    },
+    {
+      "transaction_date": "29-04-2026",
+      "description": "ya268@ UPI/611927699928/23:54:08/UPI/vanshvanapari",
+      "reference_no": "611927699928",
+      "debit": null,
+      "credit": 20.0,
+      "balance": 54908.11,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "29-04-2026 ya268@ UPI/611927699928/23:54:08/UPI/vanshvanapari 20.00 54908.11 Cr"
+    },
+    {
+      "transaction_date": "30-04-2026",
+      "description": "38-01@ji UPI/122383253267/16:54:14/UPI/24151476663",
+      "reference_no": "",
+      "debit": 58.8,
+      "credit": null,
+      "balance": 54849.31,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "30-04-2026 38-01@ji UPI/122383253267/16:54:14/UPI/24151476663 58.80 54849.31 Cr"
+    },
+    {
+      "transaction_date": "30-04-2026",
+      "description": "n24@ok UPI/122384016972/17:09:23/UPI/kakadiyalakha",
+      "reference_no": "122384016972",
+      "debit": 80.0,
+      "credit": null,
+      "balance": 54769.31,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "30-04-2026 n24@ok UPI/122384016972/17:09:23/UPI/kakadiyalakha 80.00 54769.31 Cr"
+    },
+    {
+      "transaction_date": "30-04-2026",
+      "description": "c@ptys UPI/122394509580/19:43:19/UPI/paytmqr5zsvv",
+      "reference_no": "122394509580",
+      "debit": 50.0,
+      "credit": null,
+      "balance": 54719.31,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "30-04-2026 c@ptys/ UPI/122394509580/19:43:19/UPI/paytmqr5zsvv 50.00 54719.31 Cr"
+    },
+    {
+      "transaction_date": "30-04-2026",
+      "description": "9s@ptys UPI/122395981039/20:02:14/UPI/paytmqr6gqd",
+      "reference_no": "122395981039",
+      "debit": 100.0,
+      "credit": null,
+      "balance": 54619.31,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "30-04-2026 9s@ptys/ UPI/122395981039/20:02:14/UPI/paytmqr6gqd 100.00 54619.31 Cr"
+    },
+    {
+      "transaction_date": "30-04-2026",
+      "description": "Closing Balance",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": 54619.31,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.8657,
+      "validation_status": "needs_review",
+      "page_num": 2,
+      "raw_text": "30-04-2026 Closing Balance 54619.31 Cr"
+    }
+  ],
+  "validation_summary": {
+    "ledger_mismatches": 2,
+    "date_anomalies": [],
+    "duplicates_found": false
+  }
+}

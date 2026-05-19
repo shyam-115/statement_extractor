@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "source_file": "/home/harsh/Downloads/statement_extractor/input/bandhan.avif",
+  "total_pages": 1,
+  "total_transactions": 10,
+  "total_extracted_tables": 2,
+  "column_mapping": {
+    "p1_t3_col0": "debit",
+    "p1_t3_col1": "credit",
+    "p1_t3_col2": "balance"
+  },
+  "extraction_warnings": [
+    "Column detection produced no zones on page 1, table 2",
+    "Column detection produced no zones on page 1, table 4",
+    "Column detection produced no zones on page 1, table 5"
+  ],
+  "extracted_tables": [
+    {
+      "table_id": "p1_t1",
+      "headers": [
+        "helpdesk@example.com"
+      ],
+      "rows": [
+        {
+          "helpdesk@example.com": "Kandivali 1800-555-0198"
+        },
+        {
+          "helpdesk@example.com": "1583"
+        },
+        {
+          "helpdesk@example.com": "Kandivali BDBL0001583"
+        },
+        {
+          "helpdesk@example.com": "400750008 27AAACP1234G1Z9 12, Rishma Kunj, SVP Road,."
+        }
+      ],
+      "region_type": "metadata_table"
+    },
+    {
+      "table_id": "p1_t3",
+      "headers": [
+        "DEBITS",
+        "CREDITS BALANCE",
+        "balance"
+      ],
+      "rows": [
+        {
+          "DEBITS": "",
+          "CREDITS BALANCE": "12,450.00",
+          "balance": "12,450.00"
+        },
+        {
+          "DEBITS": "",
+          "CREDITS BALANCE": "7,722.64",
+          "balance": "20,172.64"
+        },
+        {
+          "DEBITS": "",
+          "CREDITS BALANCE": "1,826.00",
+          "balance": "21,998.64"
+        },
+        {
+          "DEBITS": "197.50",
+          "CREDITS BALANCE": "",
+          "balance": "21,801.14"
+        },
+        {
+          "DEBITS": "",
+          "CREDITS BALANCE": "8,069.00",
+          "balance": "29,870.14"
+        },
+        {
+          "DEBITS": "482.00",
+          "CREDITS BALANCE": "",
+          "balance": "29,388.14"
+        },
+        {
+          "DEBITS": "",
+          "CREDITS BALANCE": "199.00",
+          "balance": "29,587.14"
+        },
+        {
+          "DEBITS": "120.00",
+          "CREDITS BALANCE": "",
+          "balance": "29,467.14"
+        },
+        {
+          "DEBITS": "",
+          "CREDITS BALANCE": "60.00",
+          "balance": "29,527.14"
+        },
+        {
+          "DEBITS": "",
+          "CREDITS BALANCE": "7,764.00",
+          "balance": "37,291.14"
+        }
+      ],
+      "region_type": "bank_transactions"
+    }
+  ],
+  "transactions": [
+    {
+      "transaction_date": null,
+      "description": "01-SEP-2024 01-SEP-2024 B/F ...",
+      "reference_no": "",
+      "debit": null,
+      "credit": 12450.0,
+      "balance": 12450.0,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01-SEP-2024 01-SEP-2024 B/F ... 12,450.00 12,450.00"
+    },
+    {
+      "transaction_date": null,
+      "description": "01-SEP-2024 01-SEP-2024 N9K4P2 NEFT CR-ACME SERVICES / REF",
+      "reference_no": "",
+      "debit": null,
+      "credit": 7722.64,
+      "balance": 20172.64,
+      "tx_type": "NEFT",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01-SEP-2024 01-SEP-2024 N9K4P2 NEFT CR-ACME SERVICES / REF 7,722.64 20,172.64"
+    },
+    {
+      "transaction_date": null,
+      "description": "02-SEP-2024 02-SEP-2024 U1P9A7 UPI/CR - COFFEE SHOP / TXN",
+      "reference_no": "",
+      "debit": null,
+      "credit": 1826.0,
+      "balance": 21998.64,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "02-SEP-2024 02-SEP-2024 U1P9A7 UPI/CR - COFFEE SHOP / TXN 1,826.00 21,998.64"
+    },
+    {
+      "transaction_date": null,
+      "description": "03-SEP-2024 03-SEP-2024 POS TXN - SUPERMARKET",
+      "reference_no": "",
+      "debit": 197.5,
+      "credit": 150303.0,
+      "balance": 21801.14,
+      "tx_type": "POS",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "03-SEP-2024 03-SEP-2024 150303 POS TXN - SUPERMARKET 197.50 21,801.14"
+    },
+    {
+      "transaction_date": null,
+      "description": "05-SEP-2024 05-SEP-2024 Q7M2D8 NEFT CR-INVOICE PAYMENT / REF",
+      "reference_no": "",
+      "debit": null,
+      "credit": 8069.0,
+      "balance": 29870.14,
+      "tx_type": "NEFT",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "05-SEP-2024 05-SEP-2024 Q7M2D8 NEFT CR-INVOICE PAYMENT / REF 8,069.00 29,870.14"
+    },
+    {
+      "transaction_date": null,
+      "description": "06-SEP-2024 06-SEP-2024 UPI/DR - UTILITY BILL",
+      "reference_no": "",
+      "debit": 482.0,
+      "credit": null,
+      "balance": 29388.14,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "06-SEP-2024 06-SEP-2024 UPI/DR - UTILITY BILL 482.00 29,388.14"
+    },
+    {
+      "transaction_date": null,
+      "description": "09-SEP-2024 09-SEP-2024 REF J3T5L1 IMPS CR-TRANSFER RECEIVED",
+      "reference_no": "",
+      "debit": null,
+      "credit": 199.0,
+      "balance": 29587.14,
+      "tx_type": "IMPS",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "09-SEP-2024 09-SEP-2024 REF J3T5L1 IMPS CR-TRANSFER RECEIVED / 199.00 29,587.14"
+    },
+    {
+      "transaction_date": null,
+      "description": "11-SEP-2024 11-SEP-2024 UPI/DR - FOOD DELIVERY",
+      "reference_no": "",
+      "debit": 120.0,
+      "credit": null,
+      "balance": 29467.14,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "11-SEP-2024 11-SEP-2024 UPI/DR - FOOD DELIVERY 120.00 29,467.14"
+    },
+    {
+      "transaction_date": null,
+      "description": "18-SEP-2024 18-SEP-2024 P8C2K6 UPI/CR - MARKETPLACE / REF",
+      "reference_no": "",
+      "debit": null,
+      "credit": 60.0,
+      "balance": 29527.14,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "18-SEP-2024 18-SEP-2024 P8C2K6 UPI/CR - MARKETPLACE / REF 60.00 29,527.14"
+    },
+    {
+      "transaction_date": null,
+      "description": "25-SEP-2024 25-SEP-2024 REF V6H1S9 NEFT CR-CLIENT SETTLEMENT",
+      "reference_no": "",
+      "debit": null,
+      "credit": 7764.0,
+      "balance": 37291.14,
+      "tx_type": "NEFT",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6731,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "25-SEP-2024 25-SEP-2024 REF V6H1S9 NEFT CR-CLIENT SETTLEMENT / 7,764.00 37,291.14"
+    }
+  ],
+  "validation_summary": {
+    "ledger_mismatches": 1,
+    "date_anomalies": [],
+    "duplicates_found": false
+  }
+}

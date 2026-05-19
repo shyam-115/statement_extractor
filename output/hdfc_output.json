@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "source_file": "/home/harsh/Downloads/statement_extractor/input/hdfc.avif",
+  "total_pages": 1,
+  "total_transactions": 14,
+  "total_extracted_tables": 1,
+  "column_mapping": {
+    "p1_t2_col0": "date",
+    "p1_t2_col1": "narration",
+    "p1_t2_col2": "reference",
+    "p1_t2_col3": "value_date",
+    "p1_t2_col4": "debit",
+    "p1_t2_col5": "balance"
+  },
+  "extraction_warnings": [
+    "Column detection produced no zones on page 1, table 1"
+  ],
+  "extracted_tables": [
+    {
+      "table_id": "p1_t2",
+      "headers": [
+        "Date",
+        "Narration",
+        "Chq./Ref.No.",
+        "Value Dt",
+        "Withdrawal Amt. Deposit Amt.",
+        "Closing Balance"
+      ],
+      "rows": [
+        {
+          "Date": "01/02/25",
+          "Narration": "23041009223676d 012022035",
+          "Chq./Ref.No.": "23044109233274",
+          "Value Dt": "01/02/25",
+          "Withdrawal Amt. Deposit Amt.": "5C20.00",
+          "Closing Balance": "8,116.47"
+        },
+        {
+          "Date": "01/02/25",
+          "Narration": "PayNow transfer receiving SIMIONLEONG 23041009223696 - 10.520083",
+          "Chq./Ref.No.": "23040109235646",
+          "Value Dt": "01/02/25",
+          "Withdrawal Amt. Deposit Amt.": "125.00",
+          "Closing Balance": "8,376.47"
+        },
+        {
+          "Date": "02/02/25",
+          "Narration": "25041109223676 - 09.604285",
+          "Chq./Ref.No.": "23040449223263",
+          "Value Dt": "02/02/25",
+          "Withdrawal Amt. Deposit Amt.": "80.00",
+          "Closing Balance": "8,251.47"
+        },
+        {
+          "Date": "05/02/25",
+          "Narration": "GOSO QUICK-MART-SG-Payment Ref 24111944905547- 03:544395",
+          "Chq./Ref.No.": "23040109233365",
+          "Value Dt": "05/02/25",
+          "Withdrawal Amt. Deposit Amt.": "55.60",
+          "Closing Balance": "8,195.87"
+        },
+        {
+          "Date": "06/02/25",
+          "Narration": "250401092223872 - 012802023",
+          "Chq./Ref.No.": "23040109223666",
+          "Value Dt": "09/02/25",
+          "Withdrawal Amt. Deposit Amt.": "300.00",
+          "Closing Balance": "8,495.87"
+        },
+        {
+          "Date": "12/02/25",
+          "Narration": "ATM WITHDRAWAL-PLACEHOLDER-SG 2504010923362.0 - 110922823",
+          "Chq./Ref.No.": "23040109223274",
+          "Value Dt": "12/02/25",
+          "Withdrawal Amt. Deposit Amt.": "200.00",
+          "Closing Balance": "8,293.57"
+        },
+        {
+          "Date": "17/02/25",
+          "Narration": "GIRO CREDITS - PAYWELL-PTE.LID 25040109223626 - 04.922025",
+          "Chq./Ref.No.": "23040109223235",
+          "Value Dt": "17/02/25",
+          "Withdrawal Amt. Deposit Amt.": "1.200.00",
+          "Closing Balance": "9,495.57"
+        },
+        {
+          "Date": "18/02/25",
+          "Narration": "25040109223875 - 95,954005",
+          "Chq./Ref.No.": "",
+          "Value Dt": "18/02/25",
+          "Withdrawal Amt. Deposit Amt.": "78.40",
+          "Closing Balance": "9,417.47"
+        },
+        {
+          "Date": "25/02/25",
+          "Narration": "25040109223079 - 80,5518035",
+          "Chq./Ref.No.": "",
+          "Value Dt": "25/02/25",
+          "Withdrawal Amt. Deposit Amt.": "35.20",
+          "Closing Balance": "9,382.27"
+        },
+        {
+          "Date": "28/02/25",
+          "Narration": "25040109223636 - 86S52083",
+          "Chq./Ref.No.": "23040109223305",
+          "Value Dt": "28/02/25",
+          "Withdrawal Amt. Deposit Amt.": "50.00",
+          "Closing Balance": "9,492.27"
+        },
+        {
+          "Date": "26/02/25",
+          "Narration": "25040109223071 - 079320025",
+          "Chq./Ref.No.": "23040109223563",
+          "Value Dt": "29/02/25",
+          "Withdrawal Amt. Deposit Amt.": "125.20",
+          "Closing Balance": "9,307.07"
+        },
+        {
+          "Date": "",
+          "Narration": "The rengne etine the thac the olrinc of seatemed torninaitines onze Raiience Rar nt sarosa be opepo Batemaetione eamciheginantes Tht-AXOEX ACGAGeas.",
+          "Chq./Ref.No.": "",
+          "Value Dt": "",
+          "Withdrawal Amt. Deposit Amt.": "",
+          "Closing Balance": ""
+        },
+        {
+          "Date": "",
+          "Narration": "",
+          "Chq./Ref.No.": "",
+          "Value Dt": "",
+          "Withdrawal Amt. Deposit Amt.": "",
+          "Closing Balance": ""
+        },
+        {
+          "Date": "Pittixete acocosod FEaicnte ianos",
+          "Narration": "ing PRODORALION, L",
+          "Chq./Ref.No.": "",
+          "Value Dt": "",
+          "Withdrawal Amt. Deposit Amt.": "",
+          "Closing Balance": ""
+        }
+      ],
+      "region_type": "bank_transactions"
+    }
+  ],
+  "transactions": [
+    {
+      "transaction_date": "01/02/25",
+      "description": "23041009223676d 012022035 Online transfer to SG-PC34-LSC685X-BAFXDZ",
+      "reference_no": "23044109233274",
+      "debit": null,
+      "credit": null,
+      "balance": 8116.47,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.8821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01/02/25 23041009223676d 012022035 Online transfer to SG-PC34-LSC685X-BAFXDZ 23044109233274 01/02/25 5C20.00 8,116.47"
+    },
+    {
+      "transaction_date": "01/02/25",
+      "description": "23041009223696 - 10.520083 PayNow transfer receiving SIMIONLEONG",
+      "reference_no": "23040109235646",
+      "debit": 125.0,
+      "credit": null,
+      "balance": 8376.47,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01/02/25 23041009223696 - 10.520083 PayNow transfer receiving SIMIONLEONG 23040109235646 01/02/25 125.00 8,376.47"
+    },
+    {
+      "transaction_date": "02/02/25",
+      "description": "25041109223676 - 09.604285 UPI-PAYNAIRJOHN-77159348895@DB5.PAYM",
+      "reference_no": "23040449223263",
+      "debit": 80.0,
+      "credit": null,
+      "balance": 8251.47,
+      "tx_type": "UPI",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "02/02/25 25041109223676 - 09.604285 UPI-PAYNAIRJOHN-77159348895@DB5.PAYM 23040449223263 02/02/25 80.00 8,251.47"
+    },
+    {
+      "transaction_date": "05/02/25",
+      "description": "24111944905547- 03:544395 GOSO QUICK-MART-SG-Payment Ref",
+      "reference_no": "23040109233365",
+      "debit": 55.6,
+      "credit": null,
+      "balance": 8195.87,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "05/02/25 24111944905547- 03:544395 GOSO QUICK-MART-SG-Payment Ref 23040109233365 05/02/25 55.60 8,195.87"
+    },
+    {
+      "transaction_date": "06/02/25",
+      "description": "250401092223872 - 012802023 Online transfer received rec from-KERLH-LIM",
+      "reference_no": "23040109223666",
+      "debit": 300.0,
+      "credit": null,
+      "balance": 8495.87,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "06/02/25 250401092223872 - 012802023 Online transfer received rec from-KERLH-LIM 23040109223666 09/02/25 300.00 8,495.87"
+    },
+    {
+      "transaction_date": "12/02/25",
+      "description": "2504010923362.0 - 110922823 ATM WITHDRAWAL-PLACEHOLDER-SG",
+      "reference_no": "23040109223274",
+      "debit": 200.0,
+      "credit": null,
+      "balance": 8293.57,
+      "tx_type": "ATM",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "12/02/25 2504010923362.0 - 110922823 ATM WITHDRAWAL-PLACEHOLDER-SG 23040109223274 12/02/25 200.00 8,293.57"
+    },
+    {
+      "transaction_date": "17/02/25",
+      "description": "25040109223626 - 04.922025 GIRO CREDITS - PAYWELL-PTE.LID",
+      "reference_no": "23040109223235",
+      "debit": null,
+      "credit": null,
+      "balance": 9495.57,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.8821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "17/02/25 25040109223626 - 04.922025 GIRO CREDITS - PAYWELL-PTE.LID 23040109223235 17/02/25 1.200.00 9,495.57"
+    },
+    {
+      "transaction_date": "18/02/25",
+      "description": "25040109223875 - 95,954005 FAIRLINK SUPERMARKET-TXN-P05830213465 23040130214866",
+      "reference_no": "P05830213465",
+      "debit": 78.4,
+      "credit": null,
+      "balance": 9417.47,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "18/02/25 25040109223875 - 95,954005 FAIRLINK SUPERMARKET-TXN-P05830213465 23040130214866 18/02/25 78.40 9,417.47"
+    },
+    {
+      "transaction_date": "25/02/25",
+      "description": "25040109223079 - 80,5518035 UPI-SCNAIR-SHANDE-YK-A@QCBC.XXNET247$913040109223375",
+      "reference_no": "913040109223375",
+      "debit": 35.2,
+      "credit": null,
+      "balance": 9382.27,
+      "tx_type": "UPI",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "25/02/25 25040109223079 - 80,5518035 UPI-SCNAIR-SHANDE-YK-A@QCBC.XXNET247$913040109223375 25/02/25 35.20 9,382.27"
+    },
+    {
+      "transaction_date": "28/02/25",
+      "description": "25040109223636 - 86S52083 WALLET-ADD-MONEY TXNH9056165783F",
+      "reference_no": "23040109223305",
+      "debit": 50.0,
+      "credit": null,
+      "balance": 9492.27,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "28/02/25 25040109223636 - 86S52083 WALLET-ADD-MONEY TXNH9056165783F 23040109223305 28/02/25 50.00 9,492.27"
+    },
+    {
+      "transaction_date": "26/02/25",
+      "description": "25040109223071 - 079320025 Utillty Payment BILL PAYMENT-SG786L245332",
+      "reference_no": "23040109223563",
+      "debit": 125.2,
+      "credit": null,
+      "balance": 9307.07,
+      "tx_type": "",
+      "validation_flags": [
+        "DATE_OUT_OF_ORDER",
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "26/02/25 25040109223071 - 079320025 Utillty Payment BILL PAYMENT-SG786L245332 23040109223563 29/02/25 125.20 9,307.07"
+    },
+    {
+      "transaction_date": null,
+      "description": "HDFC BANK LIMITED onze Raiience Rar Batemaetione eamciheginantes Tht-AXOEX ACGAGeas. The rengne etine the thac the olrinc of seatemed torninaitines nt sarosa be opepo Cinning pegirece af incladeo funds earmactione undeaned of. and cndeaned iunds AXESSIRAL Ans wene eaateeseah scaigesee wif the eeaneactiinges fut the-prwting 33 eays of conening the 30 days of reecipt of state r sefrcnmaaties",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.4821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "HDFC BANK LIMITED onze Raiience Rar Batemaetione eamciheginantes Tht-AXOEX ACGAGeas. The rengne etine the thac the olrinc of seatemed torninaitines nt sarosa be opepo - Cinning pegirece af incladeo funds earmactione undeaned of. and cndeaned iunds AXESSIRAL Ans wene eaateeseah scaigesee wif the eeaneactiinges fut the-prwting 33 eays of conening the 30 days of reecipt of state r sefrcnmaaties"
+    },
+    {
+      "transaction_date": null,
+      "description": "This is a syntnetic example created for demonstration purposss only",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.4821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "This is a syntnetic example created for demonstration purposss only"
+    },
+    {
+      "transaction_date": null,
+      "description": "Pittixete acocosod FEaicnte ianos HDFC BANK LIMITED Poltuatition o Eirtine igoo: Donoilta azin Ba ing PRODORALION, L atoapoes SWIFTBIC.ASSTTatle:EDFKGAPA1Wa S3 Wits tls Wull, toame; 2",
+      "reference_no": "EDFKGAPA1Wa",
+      "debit": null,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.4821,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "Pittixete acocosod FEaicnte ianos HDFC BANK LIMITED Poltuatition o Eirtine igoo: Donoilta azin Ba ing PRODORALION, L atoapoes SWIFTBIC.ASSTTatle:EDFKGAPA1Wa S3 Wits tls Wull, toame; 2"
+    }
+  ],
+  "validation_summary": {
+    "ledger_mismatches": 6,
+    "date_anomalies": [
+      "row_10: date 26/02/25 before previous 28/02/25"
+    ],
+    "duplicates_found": false
+  }
+}

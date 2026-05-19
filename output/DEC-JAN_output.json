@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "source_file": "/home/harsh/Downloads/statement_extractor/input/DEC-JAN.pdf",
+  "total_pages": 2,
+  "total_transactions": 6,
+  "total_extracted_tables": 3,
+  "column_mapping": {
+    "p1_t4_col0": "date",
+    "p1_t4_col1": "debit",
+    "p1_t4_col2": "balance"
+  },
+  "extraction_warnings": [
+    "Column detection produced no zones on page 1, table 1",
+    "Column detection produced no zones on page 1, table 2",
+    "Column detection produced no zones on page 1, table 3",
+    "Column detection produced no zones on page 1, table 5",
+    "Column detection produced no zones on page 1, table 6",
+    "Column detection produced no zones on page 1, table 7",
+    "Column detection produced no zones on page 2, table 1",
+    "Column detection produced no zones on page 2, table 3",
+    "Column detection produced no zones on page 2, table 5",
+    "Column detection produced no zones on page 2, table 6",
+    "Column detection produced no zones on page 2, table 7",
+    "Column detection produced no zones on page 2, table 8"
+  ],
+  "extracted_tables": [
+    {
+      "table_id": "p1_t4",
+      "headers": [
+        "date",
+        "debit",
+        "balance"
+      ],
+      "rows": [
+        {
+          "date": "30/12/2025",
+          "debit": "1,006.00 Dr",
+          "balance": "50.00 Cr"
+        },
+        {
+          "date": "30/12/2025",
+          "debit": "346.00 Dr",
+          "balance": "17.00 Cr"
+        },
+        {
+          "date": "31/12/2025",
+          "debit": "589.00 Dr",
+          "balance": "5.00 Cr"
+        },
+        {
+          "date": "01/01/2026",
+          "debit": "589.00 Cr",
+          "balance": "5.00 Dr"
+        },
+        {
+          "date": "01/01/2026",
+          "debit": "59.00 Dr",
+          "balance": "0.00 Cr"
+        },
+        {
+          "date": "03/01/2026",
+          "debit": "808.00 Dr",
+          "balance": "40.00 Cr"
+        }
+      ],
+      "region_type": "bank_transactions"
+    },
+    {
+      "table_id": "p2_t2",
+      "headers": [
+        "Fee for Cash Payment at branches Cash Withdrawal Fees",
+        "Rs. 175 2.5% of cash withdrawn (Min. Rs 500) (NA for digital cards)"
+      ],
+      "rows": [
+        {
+          "Fee for Cash Payment at branches Cash Withdrawal Fees": "",
+          "Rs. 175 2.5% of cash withdrawn (Min. Rs 500) (NA for digital cards)": "Nil if total payment due is upto Rs 500; Rs 500 if total payment due is between Rs 501 - Rs 5000;"
+        },
+        {
+          "Fee for Cash Payment at branches Cash Withdrawal Fees": "924.66",
+          "Rs. 175 2.5% of cash withdrawn (Min. Rs 500) (NA for digital cards)": "Rs 750 if total payment due is between Rs 5001-Rs 10.000;"
+        },
+        {
+          "Fee for Cash Payment at branches Cash Withdrawal Fees": "129.45",
+          "Rs. 175 2.5% of cash withdrawn (Min. Rs 500) (NA for digital cards)": "Rs 1,200 if total payment due is greater than Rs. 10,000"
+        },
+        {
+          "Fee for Cash Payment at branches Cash Withdrawal Fees": "1.00",
+          "Rs. 175 2.5% of cash withdrawn (Min. Rs 500) (NA for digital cards)": "applicable on missing payment of *(An additional charge of Rs.100 will be"
+        },
+        {
+          "Fee for Cash Payment at branches Cash Withdrawal Fees": "123.29",
+          "Rs. 175 2.5% of cash withdrawn (Min. Rs 500) (NA for digital cards)": "date for two consecutive cycles.) Minimum Amount Due (MAD) by the due"
+        },
+        {
+          "Fee for Cash Payment at branches Cash Withdrawal Fees": "117.99",
+          "Rs. 175 2.5% of cash withdrawn (Min. Rs 500) (NA for digital cards)": ""
+        }
+      ],
+      "region_type": "metadata_table"
+    },
+    {
+      "table_id": "p2_t4",
+      "headers": [
+        "debit",
+        "balance"
+      ],
+      "rows": [
+        {
+          "debit": "2%",
+          "balance": "5000"
+        },
+        {
+          "debit": "100%",
+          "balance": "1000"
+        },
+        {
+          "debit": "100%",
+          "balance": "180"
+        },
+        {
+          "debit": "100% 2%",
+          "balance": "2000 500"
+        },
+        {
+          "debit": "100%",
+          "balance": "90"
+        },
+        {
+          "debit": "",
+          "balance": ""
+        },
+        {
+          "debit": "100%",
+          "balance": "36.99"
+        },
+        {
+          "debit": "100%",
+          "balance": "6.66"
+        },
+        {
+          "debit": "",
+          "balance": "8813.65"
+        }
+      ],
+      "region_type": "metadata_table"
+    }
+  ],
+  "transactions": [
+    {
+      "transaction_date": "30/12/2025",
+      "description": "PYU*FLIPKART,BENGALURU DEPT STORES",
+      "reference_no": "",
+      "debit": 1006.0,
+      "credit": null,
+      "balance": 50.0,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.9588,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "30/12/2025 PYU*FLIPKART,BENGALURU DEPT STORES 1,006.00 Dr 50.00 Cr"
+    },
+    {
+      "transaction_date": "30/12/2025",
+      "description": "PYU*FLIPKART,BENGALURU DEPT STORES",
+      "reference_no": "",
+      "debit": 346.0,
+      "credit": null,
+      "balance": 17.0,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9588,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "30/12/2025 PYU*FLIPKART,BENGALURU DEPT STORES 346.00 Dr 17.00 Cr"
+    },
+    {
+      "transaction_date": "31/12/2025",
+      "description": "GOOGLEPLAY,MUMBAI MISC STORE",
+      "reference_no": "",
+      "debit": 589.0,
+      "credit": null,
+      "balance": 5.0,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9588,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "31/12/2025 GOOGLEPLAY,MUMBAI MISC STORE 589.00 Dr 5.00 Cr"
+    },
+    {
+      "transaction_date": "01/01/2026",
+      "description": "GOOGLEPLAY,MUMBAI MISC STORE",
+      "reference_no": "",
+      "debit": null,
+      "credit": 589.0,
+      "balance": 5.0,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9588,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01/01/2026 GOOGLEPLAY,MUMBAI MISC STORE 589.00 Cr 5.00 Dr"
+    },
+    {
+      "transaction_date": "01/01/2026",
+      "description": "GOOGLEPLAY,MUMBAI MISC STORE",
+      "reference_no": "",
+      "debit": 59.0,
+      "credit": null,
+      "balance": 0.0,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9588,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01/01/2026 GOOGLEPLAY,MUMBAI MISC STORE 59.00 Dr 0.00 Cr"
+    },
+    {
+      "transaction_date": "03/01/2026",
+      "description": "FLIPKART PAYMENTS,BANGALORE **** End of Statement **** MISC STORE",
+      "reference_no": "",
+      "debit": 808.0,
+      "credit": null,
+      "balance": 40.0,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9588,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "03/01/2026 FLIPKART PAYMENTS,BANGALORE **** End of Statement **** MISC STORE 808.00 Dr 40.00 Cr"
+    }
+  ],
+  "validation_summary": {
+    "ledger_mismatches": 5,
+    "date_anomalies": [],
+    "duplicates_found": false
+  }
+}

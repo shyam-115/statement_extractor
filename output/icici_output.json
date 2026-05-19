@@ -1,0 +1,476 @@
+{
+  "schema_version": 1,
+  "source_file": "/home/harsh/Downloads/statement_extractor/input/icici.pdf",
+  "total_pages": 1,
+  "total_transactions": 14,
+  "total_extracted_tables": 3,
+  "column_mapping": {
+    "p1_t4_col0": "date",
+    "p1_t4_col1": "narration",
+    "p1_t4_col2": "credit",
+    "p1_t4_col3": "debit",
+    "p1_t4_col5": "balance"
+  },
+  "extraction_warnings": [
+    "Column detection produced no zones on page 1, table 1",
+    "Column detection produced no zones on page 1, table 5"
+  ],
+  "extracted_tables": [
+    {
+      "table_id": "p1_t2",
+      "headers": [
+        "A/C BALANCE",
+        "FIXXED DEPOSITS (II/LINKED) (II)",
+        "TOTAL BALANCE (I+II) NOMINATION"
+      ],
+      "rows": [
+        {
+          "A/C BALANCE": "2,81,064.22",
+          "FIXXED DEPOSITS (II/LINKED) (II)": "0.00",
+          "TOTAL BALANCE (I+II) NOMINATION": "2,81,064.22"
+        },
+        {
+          "A/C BALANCE": "1,75,982.91",
+          "FIXXED DEPOSITS (II/LINKED) (II)": "0.00",
+          "TOTAL BALANCE (I+II) NOMINATION": "1,75,982.91"
+        },
+        {
+          "A/C BALANCE": "2,81,064.22",
+          "FIXXED DEPOSITS (II/LINKED) (II)": "0.00",
+          "TOTAL BALANCE (I+II) NOMINATION": "2,81,064.22"
+        }
+      ],
+      "region_type": "metadata_table"
+    },
+    {
+      "table_id": "p1_t3",
+      "headers": [
+        "FIXED DEPOSITS - INR DEPOSIT NO.",
+        "OPEN DATE",
+        "R.0.1. P.1.8.",
+        "Mat. amt.",
+        "MAT.DATE"
+      ],
+      "rows": [
+        {
+          "FIXED DEPOSITS - INR DEPOSIT NO.": "117890000112",
+          "OPEN DATE": "1,00,000.0",
+          "R.0.1. P.1.8.": "6.25%",
+          "Mat. amt.": "01-03-2025",
+          "MAT.DATE": "01-03-2025"
+        },
+        {
+          "FIXED DEPOSITS - INR DEPOSIT NO.": "117890004112",
+          "OPEN DATE": "1,00,000.0",
+          "R.0.1. P.1.8.": "6.25%",
+          "Mat. amt.": "01-03-2025",
+          "MAT.DATE": "01-09-2025"
+        },
+        {
+          "FIXED DEPOSITS - INR DEPOSIT NO.": "117890000112",
+          "OPEN DATE": "1,00,000.0",
+          "R.0.1. P.1.8.": "6.25%",
+          "Mat. amt.": "01-09-2025",
+          "MAT.DATE": "01-05-2025"
+        },
+        {
+          "FIXED DEPOSITS - INR DEPOSIT NO.": "117690013997",
+          "OPEN DATE": "1,00,000.0",
+          "R.0.1. P.1.8.": "6.25%",
+          "Mat. amt.": "01-03-2025",
+          "MAT.DATE": "01-03-2025"
+        },
+        {
+          "FIXED DEPOSITS - INR DEPOSIT NO.": "117899000924",
+          "OPEN DATE": "1,00,000.0",
+          "R.0.1. P.1.8.": "6.25%",
+          "Mat. amt.": "01-03-2025",
+          "MAT.DATE": "01-09-2025"
+        },
+        {
+          "FIXED DEPOSITS - INR DEPOSIT NO.": "117999538929",
+          "OPEN DATE": "1,00,000.0",
+          "R.0.1. P.1.8.": "6.25%",
+          "Mat. amt.": "01-09-2025",
+          "MAT.DATE": "01-03-2025"
+        },
+        {
+          "FIXED DEPOSITS - INR DEPOSIT NO.": "TOTAL",
+          "OPEN DATE": "",
+          "R.0.1. P.1.8.": "",
+          "Mat. amt.": "",
+          "MAT.DATE": "8,10,992.00"
+        }
+      ],
+      "region_type": "metadata_table"
+    },
+    {
+      "table_id": "p1_t4",
+      "headers": [
+        "DATE MODE",
+        "PARTICULARS",
+        "DEPOSITS",
+        "WITHDRAWALS",
+        "Column_4",
+        "BALANCE"
+      ],
+      "rows": [
+        {
+          "DATE MODE": "01-03-2025",
+          "PARTICULARS": "Savings Bepesit",
+          "DEPOSITS": "",
+          "WITHDRAWALS": "",
+          "Column_4": "",
+          "BALANCE": "0,28,064.22"
+        },
+        {
+          "DATE MODE": "01-03-2025 BY-TRANSFER",
+          "PARTICULARS": "SEEF-INFEDMAL TRANSTER",
+          "DEPOSITS": "25,000.00",
+          "WITHDRAWALS": "",
+          "Column_4": "",
+          "BALANCE": "0,78,003.89"
+        },
+        {
+          "DATE MODE": "01-09-2025-TIRE",
+          "PARTICULARS": "SSET-FNTETMEL TRANSTER",
+          "DEPOSITS": "",
+          "WITHDRAWALS": "8,000.00",
+          "Column_4": "",
+          "BALANCE": "1,05.009.02"
+        },
+        {
+          "DATE MODE": "01-09-2025 NTFS",
+          "PARTICULARS": "JHOV-WITTHDRAN/SEDB8327",
+          "DEPOSITS": "13,590.00",
+          "WITHDRAWALS": "",
+          "Column_4": "",
+          "BALANCE": "1,25,976.09"
+        },
+        {
+          "DATE MODE": "03-03-2025 COMB8H17386",
+          "PARTICULARS": "BALANCO/SGD-ML OBIM3889033037833879",
+          "DEPOSITS": "7,198.00",
+          "WITHDRAWALS": "7.600.00",
+          "Column_4": "",
+          "BALANCE": "1,55,060.01"
+        },
+        {
+          "DATE MODE": "03-09-2025 TIRE",
+          "PARTICULARS": "PREFSU TRAHESBAN: 2AM 2936967",
+          "DEPOSITS": "2,350.00",
+          "WITHDRAWALS": "",
+          "Column_4": "",
+          "BALANCE": "1,75,982.01"
+        },
+        {
+          "DATE MODE": "03-09-2025 BELS",
+          "PARTICULARS": "ATY-WITHORAWVE790DM3M-DRD7133190",
+          "DEPOSITS": "9,500.00",
+          "WITHDRAWALS": "",
+          "Column_4": "",
+          "BALANCE": "1,75,000.01"
+        },
+        {
+          "DATE MODE": "33-03-2025 GEFITY",
+          "PARTICULARS": "Seteront of Ineastes",
+          "DEPOSITS": "",
+          "WITHDRAWALS": "10,000.00",
+          "Column_4": "",
+          "BALANCE": "1,75,992.91"
+        },
+        {
+          "DATE MODE": "TOTAL",
+          "PARTICULARS": "Deal Balance",
+          "DEPOSITS": "75,000.00",
+          "WITHDRAWALS": "",
+          "Column_4": "",
+          "BALANCE": "1,76,982.91"
+        },
+        {
+          "DATE MODE": "",
+          "PARTICULARS": "",
+          "DEPOSITS": "",
+          "WITHDRAWALS": "",
+          "Column_4": "",
+          "BALANCE": ""
+        },
+        {
+          "DATE MODE": "FINANCIAL REMINDER",
+          "PARTICULARS": "",
+          "DEPOSITS": "",
+          "WITHDRAWALS": "",
+          "Column_4": "BALANCE",
+          "BALANCE": ""
+        },
+        {
+          "DATE MODE": "Statement Balance as on:",
+          "PARTICULARS": "20-03-2025",
+          "DEPOSITS": "",
+          "WITHDRAWALS": "",
+          "Column_4": "2,81,064.22",
+          "BALANCE": ""
+        },
+        {
+          "DATE MODE": "Current ALchKe Ns:",
+          "PARTICULARS": "112345679901",
+          "DEPOSITS": "",
+          "WITHDRAWALS": "",
+          "Column_4": "2,81,094.22",
+          "BALANCE": ""
+        },
+        {
+          "DATE MODE": "mad (od ate moe apily ings TISC537s03 St",
+          "PARTICULARS": "",
+          "DEPOSITS": ",TOS Barriohs",
+          "WITHDRAWALS": "",
+          "Column_4": "5,897.45",
+          "BALANCE": ""
+        }
+      ],
+      "region_type": "bank_transactions"
+    }
+  ],
+  "transactions": [
+    {
+      "transaction_date": "01-03-2025",
+      "description": "Savings Bepesit",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": 28064.22,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.8722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01-03-2025 Savings Bepesit 0,28,064.22"
+    },
+    {
+      "transaction_date": "01-03-2025",
+      "description": "BY-TRANSFER SEEF-INFEDMAL TRANSTER",
+      "reference_no": "",
+      "debit": null,
+      "credit": 25000.0,
+      "balance": 78003.89,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01-03-2025 BY-TRANSFER SEEF-INFEDMAL TRANSTER 25,000.00 0,78,003.89"
+    },
+    {
+      "transaction_date": "01-09-2025",
+      "description": "TIRE SSET-FNTETMEL TRANSTER",
+      "reference_no": "",
+      "debit": 8000.0,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.8722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01-09-2025-TIRE SSET-FNTETMEL TRANSTER 8,000.00 1,05.009.02"
+    },
+    {
+      "transaction_date": "01-09-2025",
+      "description": "NTFS JHOV-WITTHDRAN/SEDB8327",
+      "reference_no": "",
+      "debit": null,
+      "credit": 13590.0,
+      "balance": 125976.09,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "01-09-2025 NTFS JHOV-WITTHDRAN/SEDB8327 13,590.00 1,25,976.09"
+    },
+    {
+      "transaction_date": "03-03-2025",
+      "description": "COMB8H17386 BALANCO/SGD-ML OBIM3889033037833879",
+      "reference_no": "OBIM3889033037833879",
+      "debit": null,
+      "credit": 7198.0,
+      "balance": 155060.01,
+      "tx_type": "",
+      "validation_flags": [
+        "DATE_OUT_OF_ORDER",
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "03-03-2025 COMB8H17386 BALANCO/SGD-ML OBIM3889033037833879 7,198.00 7.600.00 1,55,060.01"
+    },
+    {
+      "transaction_date": "03-09-2025",
+      "description": "TIRE PREFSU TRAHESBAN: 2AM 2936967",
+      "reference_no": "",
+      "debit": null,
+      "credit": 2350.0,
+      "balance": 175982.01,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "03-09-2025 TIRE PREFSU TRAHESBAN: 2AM 2936967 2,350.00 1,75,982.01"
+    },
+    {
+      "transaction_date": "03-09-2025",
+      "description": "BELS ATY-WITHORAWVE790DM3M-DRD7133190",
+      "reference_no": "WITHORAWVE790DM3M",
+      "debit": null,
+      "credit": 9500.0,
+      "balance": 175000.01,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "03-09-2025 BELS ATY-WITHORAWVE790DM3M-DRD7133190 9,500.00 1,75,000.01"
+    },
+    {
+      "transaction_date": "33-03-2025",
+      "description": "GEFITY Seteront of Ineastes",
+      "reference_no": "",
+      "debit": 10000.0,
+      "credit": null,
+      "balance": 175992.91,
+      "tx_type": "",
+      "validation_flags": [
+        "DATE_ANOMALY",
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.9722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "33-03-2025 GEFITY Seteront of Ineastes 10,000.00 1,75,992.91"
+    },
+    {
+      "transaction_date": null,
+      "description": "TOTAL Deal Balance",
+      "reference_no": "",
+      "debit": null,
+      "credit": 75000.0,
+      "balance": 176982.91,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.7222,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "TOTAL Deal Balance 75,000.00 1,76,982.91"
+    },
+    {
+      "transaction_date": null,
+      "description": "F aglananta Tatis e tannrer por carrmo wtiert canatits an consecatiou resolglis sty an sutjJect to change cellangs an prersalor shachorwalh on ITGs oin Hanuds. sdatinterrest of ure connpement ao Deasolks all ther *o dertie Tianess.",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.4722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "F aglananta Tatis e tannrer por carrmo wtiert canatits an consecatiou resolglis sty an sutjJect to change cellangs an prersalor shachorwalh on ITGs oin Hanuds. sdatinterrest of ure connpement ao Deasolks all ther *o dertie Tianess."
+    },
+    {
+      "transaction_date": null,
+      "description": "FINANCIAL REMINDER BALANCE",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": null,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.4722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "FINANCIAL REMINDER BALANCE"
+    },
+    {
+      "transaction_date": "20-03-2025",
+      "description": "Statement Balance as on:",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": 281064.22,
+      "tx_type": "",
+      "validation_flags": [
+        "DATE_OUT_OF_ORDER",
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.8722,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "Statement Balance as on: 20-03-2025 2,81,064.22"
+    },
+    {
+      "transaction_date": null,
+      "description": "Current ALchKe Ns: 112345679901",
+      "reference_no": "112345679901",
+      "debit": null,
+      "credit": null,
+      "balance": 281094.22,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
+      "confidence_score": 0.6222,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "Current ALchKe Ns: 112345679901 2,81,094.22"
+    },
+    {
+      "transaction_date": null,
+      "description": "mad (od ate moe apily ings TISC537s03 St Now due: ICICT Bank VISA Platinum Card  4375 6821 2345 6789  4375 6821 2345 6769",
+      "reference_no": "",
+      "debit": null,
+      "credit": null,
+      "balance": 5897.45,
+      "tx_type": "",
+      "validation_flags": [
+        "BALANCE_MISMATCH"
+      ],
+      "continuation": false,
+      "confidence_score": 0.6222,
+      "validation_status": "needs_review",
+      "page_num": 0,
+      "raw_text": "mad (od ate moe apily ings TISC537s03 St Now due: ICICT Bank VISA Platinum Card  4375 6821 2345 6789  4375 6821 2345 6769 ,TOS Barriohs 5,897.45"
+    }
+  ],
+  "validation_summary": {
+    "ledger_mismatches": 9,
+    "date_anomalies": [
+      "row_4: date 03-03-2025 before previous 01-09-2025",
+      "row_7: unparseable date '33-03-2025'",
+      "row_11: date 20-03-2025 before previous None"
+    ],
+    "duplicates_found": false
+  }
+}
