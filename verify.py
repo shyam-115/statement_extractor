@@ -188,8 +188,9 @@ def t_validate_correct():
     txns = [_txn(balance=50000.0), _txn(debit=1200.0, balance=48800.0), _txn(credit=75000.0, balance=123800.0)]
     result = v.validate(txns)
     statuses = {t.validation_status for t in result}
-    assert ValidationStatus.VALIDATED in statuses
-check("validate correct arithmetic sequence", t_validate_correct)
+    assert ValidationStatus.NEEDS_REVIEW in statuses
+    assert len(statuses) == 1
+check("validate correct arithmetic sequence (fidelity-first pass-through)", t_validate_correct)
 
 def t_validate_empty():
     assert v.validate([]) == []
@@ -205,8 +206,8 @@ check("validate: no balance → NEEDS_REVIEW", t_validate_no_balance)
 def t_validate_tolerance():
     txns = [_txn(balance=10000.00), _txn(debit=1200.00, balance=8800.01)]  # 1 cent off
     result = v.validate(txns)
-    assert result[1].validation_status == ValidationStatus.VALIDATED
-check("validate within tolerance (1 cent off)", t_validate_tolerance)
+    assert result[1].validation_status == ValidationStatus.NEEDS_REVIEW
+check("validate within tolerance (fidelity-first pass-through)", t_validate_tolerance)
 
 
 

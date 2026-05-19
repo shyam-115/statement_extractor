@@ -73,8 +73,15 @@ from .grouping.table_segmenter import TableSegmenter
 from .clustering.column_detector import ColumnDetector
 from .parsing.header_inference import HeaderInference
 from .parsing.transaction_reconstructor import TransactionReconstructor
+from .parsing.native_extractor import NativeExtractor
+from .utils.line_detector import LineDetector
+
 from .validation.balance_validator import BalanceValidator
+from .validation.ledger_validator import LedgerValidator
 from .validation.confidence_fuser import ConfidenceFuser
+from .financial.semantic_resolver import SemanticAmountResolver
+from .financial.taxonomy import TransactionTaxonomy
+from .continuity.page_stitcher import CrossPageStitcher
 from .layout.region_classifier import LayoutRegionClassifier
 from .layout.bank_fingerprinter import BankFingerprinter
 from .schemas import (
@@ -87,6 +94,7 @@ from .schemas import (
     RegionType,
     Transaction,
     ValidationStatus,
+    ValidationSummary,
 )
 from .utils.exporters import save_to_json, save_to_csv
 from .utils.debug_viz import DebugVisualizer
@@ -117,15 +125,24 @@ class StatementExtractor:
 
         logger.info("Initialising StatementExtractor …")
         self._ocr             = OCREngine(self.config.ocr)
+        self._native_ext      = NativeExtractor()
         self._row_grouper     = RowGrouper(self.config.row_grouping)
         self._table_segmenter = TableSegmenter(self.config)
         self._col_detector    = ColumnDetector(self.config.column_detection)
         self._header_inf      = HeaderInference(self.config.header_inference)
         self._reconstructor   = TransactionReconstructor(self.config)
         self._validator       = BalanceValidator(self.config.validation)
+        self._ledger          = LedgerValidator(
+            tolerance_absolute=self.config.validation.tolerance_absolute,
+            tolerance_fraction=self.config.validation.tolerance_fraction,
+        )
+        self._semantic        = SemanticAmountResolver()
+        self._taxonomy        = TransactionTaxonomy()
+        self._stitcher        = CrossPageStitcher()
         self._fuser           = ConfidenceFuser(self.config.confidence_fusion)
         self._region_clf      = LayoutRegionClassifier(self.config.layout)
         self._bank_fp         = BankFingerprinter(self.config.bank_fingerprint)
+        self._section_header  = ""
 
         if self.config.debug:
             self._visualizer = DebugVisualizer(self.config.debug_output_dir)
@@ -154,14 +171,29 @@ class StatementExtractor:
         logger.info("Extracting: %s", file_path)
         warnings: List[str] = []
 
-        # ── Stage 1: OCR ────────────────────────────────────────────────
+        # ── Stage 1: Extraction (Hybrid Native/OCR) ─────────────────────
         try:
-            tokens_per_page, images = self._ocr.process_file(file_path)
+            path_obj = Path(file_path)
+            is_pdf = path_obj.suffix.lower() == ".pdf"
+            
+            if is_pdf and NativeExtractor.is_digital_pdf(file_path):
+                logger.info("Digital PDF detected. Using Native Text Extraction.")
+                if self.config.ocr.adaptive_dpi:
+                    self.config.ocr.dpi = self.config.ocr.digital_dpi
+                
+                tokens_per_page = self._native_ext.extract_tokens(file_path, dpi=self.config.ocr.dpi)
+                images = self._native_ext.get_page_images(file_path, dpi=self.config.ocr.dpi)
+            else:
+                logger.info("Scanned document or image detected. Using OCR.")
+                if self.config.ocr.adaptive_dpi:
+                    self.config.ocr.dpi = self.config.ocr.scanned_dpi
+                    
+                tokens_per_page, images = self._ocr.process_file(file_path)
         except Exception as exc:
-            logger.error("OCR failed: %s", exc, exc_info=True)
+            logger.error("Extraction failed: %s", exc, exc_info=True)
             return ExtractionResult(
                 source_file=file_path,
-                extraction_warnings=[f"OCR error: {exc}"],
+                extraction_warnings=[f"Extraction error: {exc}"],
             )
 
         total_pages = len(tokens_per_page)
@@ -187,7 +219,13 @@ class StatementExtractor:
 
         for page_num, tokens in enumerate(tokens_per_page):
             all_tokens.extend(tokens)
-            rows = self._row_grouper.group(tokens, page_num)
+            
+            # Detect horizontal lines for line-aware clustering
+            horizontal_lines = []
+            if page_num < len(images):
+                horizontal_lines, _ = LineDetector.detect_lines(images[page_num])
+                
+            rows = self._row_grouper.group(tokens, page_num, horizontal_lines)
             rows = self._row_grouper.merge_continuations(rows)
             all_rows.extend(rows)
 
@@ -222,7 +260,10 @@ class StatementExtractor:
         txn_tokens_map: Dict[int, List[OCRToken]] = {}
         txn_zones_map:  Dict[int, List[ColumnZone]] = {}
 
+        early_exit = False
         for page_num in range(len(tokens_per_page)):
+            if early_exit:
+                break
             page_rows = [r for r in all_rows if r.page_num == page_num]
             if not page_rows:
                 page_zones[page_num] = []
@@ -317,19 +358,17 @@ class StatementExtractor:
                     )
                 )
 
-                # ── Route only TRANSACTION_TABLE regions ─────────────
-                is_transaction_table = (
+                # ── Route transaction-intent regions ─────────────────
+                is_transaction_table = RegionType.is_transaction_region(
+                    region_type
+                ) or (
                     region_type == RegionType.TRANSACTION_TABLE
-                    # Compatibility guard: if layout classifier is disabled or
-                    # returns METADATA_TABLE but header heuristics strongly
-                    # suggest a transaction table, honour the header heuristics.
-                    or (
-                        region_type == RegionType.METADATA_TABLE
-                        and "date" in roles_found
-                        and bool({"debit", "credit", "balance"} & roles_found)
-                        and "narration" in roles_found
-                        and region_score >= 0.30
-                    )
+                ) or (
+                    region_type == RegionType.METADATA_TABLE
+                    and "date" in roles_found
+                    and bool({"debit", "credit", "balance"} & roles_found)
+                    and "narration" in roles_found
+                    and region_score >= 0.30
                 )
 
                 if is_transaction_table:
@@ -364,6 +403,18 @@ class StatementExtractor:
                         txn_zones_map[id(txn)]  = zones
 
                     all_transactions.extend(table_txns)
+
+                    if (
+                        self.config.pipeline.early_exit_on_full_table
+                        and len(all_transactions)
+                        >= self.config.pipeline.min_transactions_for_early_exit
+                    ):
+                        logger.info(
+                            "Early exit: %d transactions found — skipping remaining pages",
+                            len(all_transactions),
+                        )
+                        early_exit = True
+                        break
                 else:
                     logger.debug(
                         "%s skipped for transaction reconstruction "
@@ -386,17 +437,50 @@ class StatementExtractor:
             len(all_transactions), len(all_extracted_tables), total_pages,
         )
 
-        # ── Stage 8: Fidelity-first validation (status tagging only) ───
+        # ── Stage 8: Semantic amount resolution ───────────────────────
+        if self.config.pipeline.semantic_resolver and all_transactions:
+            prev_bal: Optional[float] = None
+            for txn in all_transactions:
+                self._semantic.apply_to_transaction(
+                    txn,
+                    section_header=self._section_header,
+                    prev_balance=prev_bal,
+                )
+                if txn.balance is not None:
+                    prev_bal = txn.balance
+
+        # ── Stage 9: Transaction taxonomy ───────────────────────────────
+        if self.config.pipeline.transaction_taxonomy:
+            for txn in all_transactions:
+                txn.tx_type = self._taxonomy.classify(
+                    txn.description, txn.raw_text
+                )
+
+        # ── Stage 10: Cross-page stitching ────────────────────────────
+        if self.config.pipeline.cross_page_stitching and all_transactions:
+            all_transactions = self._stitcher.stitch(all_transactions)
+
+        # ── Stage 11: Fidelity-first status tagging ─────────────────────
         all_transactions = self._validator.validate(all_transactions)
 
-        # ── Stage 9: Multi-factor confidence fusion ─────────────────────
+        # ── Stage 12: Ledger reconciliation (non-mutating) ────────────
+        validation_summary: Optional[ValidationSummary] = None
+        if self.config.validation.ledger_validation and all_transactions:
+            all_transactions, ledger_sum = self._ledger.validate(all_transactions)
+            validation_summary = ValidationSummary(
+                ledger_mismatches=ledger_sum.ledger_mismatches,
+                date_anomalies=ledger_sum.date_anomalies,
+                duplicates_found=ledger_sum.duplicates_found,
+            )
+
+        # ── Stage 13: Multi-factor confidence fusion ────────────────────
         if self.config.confidence_fusion.enabled:
             for txn in all_transactions:
                 tokens = txn_tokens_map.get(id(txn), [])
                 zones  = txn_zones_map.get(id(txn), [])
                 self._fuser.fuse(txn, tokens, zones)
 
-        # ── Stage 10: Document-level confidence summary ─────────────────
+        # ── Stage 14: Document-level confidence summary ─────────────────
         doc_confidence = 0.0
         if all_transactions:
             doc_confidence = sum(
@@ -407,7 +491,7 @@ class StatementExtractor:
             if t.validation_status == ValidationStatus.VALIDATED
         ) / max(len(all_transactions), 1)
 
-        # ── Stage 11: Debug re-render with zones ───────────────────────
+        # ── Stage 15: Debug re-render with zones ───────────────────────
         if self._visualizer:
             for page_num, tokens in enumerate(tokens_per_page):
                 if page_num < len(images):
@@ -427,6 +511,7 @@ class StatementExtractor:
             source_file=str(Path(file_path).resolve()),
             extraction_warnings=warnings,
             column_mapping=combined_mapping,
+            validation_summary=validation_summary,
             bank_profile=bank_profile,
             document_confidence_score=round(doc_confidence, 4),
             validated_ratio=round(validated_ratio, 4),

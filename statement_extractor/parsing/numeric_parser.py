@@ -51,6 +51,11 @@ _DATE_PATTERNS = [
     re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{4}(?!\d)"),                    # DD/MM/YYYY
     re.compile(r"\b\d{4}[/-]\d{2}[/-]\d{2}(?!\d)"),                    # YYYY-MM-DD
     re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{2}(?!\d)"),                    # DD/MM/YY
+    # Day + short month + 2- or 4-digit year (common on Indian CC statements)
+    re.compile(
+        r"\b\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4}\b",
+        re.IGNORECASE,
+    ),
     re.compile(r"\b\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|"
                r"Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]*\d{2,4}\b",
                re.IGNORECASE),                                       # 12 Jan 2024
@@ -74,7 +79,9 @@ _REFERENCE_PATTERNS = [
     re.compile(r"\b[A-Z]{3,6}\d{10,22}\b"),               # NEFT/IMPS/UPI ref
     re.compile(r"\bUTR\s*:?\s*[\w\d]{10,22}\b", re.IGNORECASE),
     re.compile(r"\b\d{16,22}\b"),                          # Long numeric ref
-    re.compile(r"\b[A-Z0-9]{12,24}\b"),                    # Generic alphanumeric ref
+    # Generic refs must contain digits — avoids matching long English words
+    # (e.g. merchant names ending in "INTERNATIONAL").
+    re.compile(r"\b(?=[A-Z0-9]*\d)[A-Z0-9]{10,24}\b", re.IGNORECASE),
 ]
 
 
@@ -93,6 +100,8 @@ class NumericParser:
     def is_amount(text: str) -> bool:
         """Return True if *text* strictly matches a monetary amount format."""
         t = text.strip()
+        if re.match(r"^-?0\d{3,}$", t) and "." not in t:
+            return False
         return bool(_AMOUNT_PATTERN.match(t)) and len(_CLEAN_AMOUNT.sub("", t)) >= 1
 
     @staticmethod
@@ -211,14 +220,28 @@ class NumericParser:
                 return m.group(0).strip()
         return None
 
+    # Compiled pattern for bare calendar years (1900-2099) with no decimal/comma formatting.
+    # Such values are date fragments, not monetary amounts.
+    _BARE_YEAR = re.compile(r"^(19|20)\d{2}$")
+
     def clean_amount_str(self, text: str) -> Optional[float]:
         """Parse and return the float value only, ignoring sign semantics, while healing OCR typos like 1,95.009.02"""
         t = text.strip()
-        
+
         # Guard: do not hallucinate amounts from explicit dates (e.g. "02 Apr 2026" -> 22026.0)
         if self.is_date(t):
             return None
-            
+
+        # Guard: bare 4-digit calendar years (e.g. "2026", "1999") are date fragments,
+        # not monetary amounts. Genuine amounts appear as "2,026.00" or "2026.00".
+        if self._BARE_YEAR.match(t):
+            return None
+
+        # Guard: integers with leading zeros (e.g. "00380066") and no decimal 
+        # are reference/ID numbers, not monetary amounts.
+        if re.match(r"^-?0\d{3,}$", t) and "." not in t:
+            return None
+
         # Guard: require the string to be predominantly numeric before aggressive stripping
         if not self.looks_like_number(t):
             return None

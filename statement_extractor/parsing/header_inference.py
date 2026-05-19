@@ -41,7 +41,7 @@ from ..schemas import BankProfile, ColumnZone, LogicalRow
 logger = logging.getLogger(__name__)
 
 # Role priority for tie-breaking when scores are equal
-ROLE_PRIORITY = ["date", "reference", "debit", "credit", "balance", "narration"]
+ROLE_PRIORITY = ["noise", "index", "date", "reference", "debit", "credit", "balance", "narration"]
 
 # Minimum score margin between first and second-best role to accept a match.
 # If the gap is smaller the assignment is considered ambiguous.
@@ -66,12 +66,14 @@ class HeaderInference:
         self.config = config
         self.bank_profile = bank_profile or BankProfile()
         self._vocab: Dict[str, List[str]] = {
+            "index":     config.index_keywords,
             "date":      config.date_keywords,
             "narration": config.narration_keywords,
             "debit":     config.debit_keywords,
             "credit":    config.credit_keywords,
             "balance":   config.balance_keywords,
             "reference": config.reference_keywords,
+            "noise":     config.noise_keywords,
         }
 
     # ------------------------------------------------------------------
@@ -99,6 +101,10 @@ class HeaderInference:
             return zones
 
         header_rows = [r for r in rows if r.is_header or r.is_table_header]
+        header_blob_lc = (
+            " ".join(r.full_text for r in header_rows).lower() if header_rows else ""
+        )
+        cc_single_amount = self._is_cc_transaction_header_blob(header_blob_lc)
 
         used_fallback = False
         if header_rows:
@@ -113,7 +119,16 @@ class HeaderInference:
             used_fallback = True
 
         # Fill any still-unassigned zones with positional fallback
-        zones = self._positional_fallback(zones)
+        zones = self._positional_fallback(
+            zones, suppress_secondary_credit=cc_single_amount
+        )
+
+        if cc_single_amount:
+            zones = self._collapse_cc_movement_columns(zones)
+            zones = self._strip_cc_hallucinated_balance(zones)
+            zones = self._positional_fallback(
+                zones, suppress_secondary_credit=True
+            )
 
         # Apply debit/credit order correction only when bank profile doesn't
         # give us an explicit advisory — and only when we used positional fallback.
@@ -230,11 +245,27 @@ class HeaderInference:
                 if role_score < threshold:
                     continue
 
-                # Check margin: winner must be clearly ahead of all other roles
-                other_scores = [
-                    s for r, s in zone_scores.items()
-                    if r != role and r not in assigned_roles
-                ]
+                # Compute the gap: how much better this role scores vs the next-best
+                # *unassigned* role.
+                #
+                # Special case for merged debit/credit columns (e.g. Kotak-style
+                # "Withdrawal (Dr.) Deposit (Cr.)" headers): both debit and credit score
+                # ~100 on the same zone, so the naive gap is 0 and neither wins.
+                # To handle this we exclude the complementary financial role when
+                # computing the gap for the other financial role — this lets debit win
+                # (it is processed first in ROLE_PRIORITY) for the merged column.
+                _FINANCIAL_PAIR = {"debit", "credit"}
+                if role in _FINANCIAL_PAIR:
+                    other_scores = [
+                        s for r, s in zone_scores.items()
+                        if r != role and r not in assigned_roles
+                        and r not in _FINANCIAL_PAIR  # ignore complementary financial role
+                    ]
+                else:
+                    other_scores = [
+                        s for r, s in zone_scores.items()
+                        if r != role and r not in assigned_roles
+                    ]
                 second_best = max(other_scores) if other_scores else 0.0
                 gap = role_score - second_best
 
@@ -292,15 +323,23 @@ class HeaderInference:
     # Positional fallback
     # ------------------------------------------------------------------
 
-    def _positional_fallback(self, zones: List[ColumnZone]) -> List[ColumnZone]:
+    def _positional_fallback(
+        self,
+        zones: List[ColumnZone],
+        *,
+        suppress_secondary_credit: bool = False,
+    ) -> List[ColumnZone]:
         """
         Apply positional heuristics for zones still missing a role.
 
-        Heuristics (left → right):
-        - First zone (x < 0.25) without a role → date
-        - Rightmost unassigned → balance
-        - Widest unassigned zone (width > 15%) → narration
-        - Remaining pair (right to left) → debit, credit
+        Heuristics (ordered by specificity):
+        1. First zone (x < 0.25) without a role → date
+        2. Widest unassigned zone (width > 15%) → narration
+           (checked BEFORE balance to prevent wide description columns
+            from being mis-assigned as balance — critical for credit card
+            statements that have no running balance column)
+        3. Rightmost narrow unassigned → balance
+        4. Remaining pair (right to left) → debit, credit
         """
         unassigned = [z for z in zones if z.semantic_role is None]
         if not unassigned:
@@ -308,7 +347,7 @@ class HeaderInference:
 
         assigned_roles = {z.semantic_role for z in zones if z.semantic_role}
 
-        # Leftmost unassigned → date
+        # 1. Leftmost unassigned → date
         if "date" not in assigned_roles and unassigned:
             leftmost = min(unassigned, key=lambda z: z.x_center)
             if leftmost.x_center < 0.25:
@@ -316,14 +355,7 @@ class HeaderInference:
                 unassigned.remove(leftmost)
                 assigned_roles.add("date")
 
-        # Rightmost unassigned → balance
-        if "balance" not in assigned_roles and unassigned:
-            rightmost = max(unassigned, key=lambda z: z.x_center)
-            rightmost.semantic_role = "balance"
-            unassigned.remove(rightmost)
-            assigned_roles.add("balance")
-
-        # Widest remaining → narration
+        # 2. Widest remaining → narration  (BEFORE balance)
         if "narration" not in assigned_roles and unassigned:
             widest = max(
                 unassigned,
@@ -334,17 +366,95 @@ class HeaderInference:
                 unassigned.remove(widest)
                 assigned_roles.add("narration")
 
-        # Remaining pair → debit / credit (right to left)
+        # 3. Rightmost unassigned → balance
+        #    Guard: never assign balance to a zone wider than 25% of page —
+        #    balance columns are narrow numeric columns, not wide text zones.
+        if "balance" not in assigned_roles and unassigned:
+            rightmost = max(unassigned, key=lambda z: z.x_center)
+            zone_width = rightmost.right_boundary - rightmost.left_boundary
+            if zone_width <= 0.25:
+                rightmost.semantic_role = "balance"
+                unassigned.remove(rightmost)
+                assigned_roles.add("balance")
+            else:
+                # Wide rightmost zone is likely narration, not balance
+                if "narration" not in assigned_roles:
+                    rightmost.semantic_role = "narration"
+                    unassigned.remove(rightmost)
+                    assigned_roles.add("narration")
+
+        # 4. Remaining pair → debit / credit (right to left).
+        # Zones already assigned "index" or "noise" role are never re-used.
         if unassigned:
-            remaining = sorted(unassigned, key=lambda z: z.x_center, reverse=True)
+            remaining = sorted(
+                [z for z in unassigned if z.semantic_role not in ("index", "noise")],
+                key=lambda z: z.x_center,
+                reverse=True,
+            )
             roles_to_assign: List[str] = []
             if "debit" not in assigned_roles:
                 roles_to_assign.append("debit")
             if "credit" not in assigned_roles:
                 roles_to_assign.append("credit")
+            if suppress_secondary_credit and "debit" in assigned_roles:
+                roles_to_assign = [r for r in roles_to_assign if r != "credit"]
             for zone, role in zip(remaining, roles_to_assign):
                 zone.semantic_role = role
 
+        return zones
+
+    @staticmethod
+    def _is_cc_transaction_header_blob(blob_lc: str) -> bool:
+        """
+        True when headers describe a typical credit-card movement grid
+        (one amount column with Dr/Cr in cells, not separate Dr/Cr columns).
+        """
+        if not blob_lc:
+            return False
+        has_txn = (
+            ("transaction" in blob_lc and "details" in blob_lc)
+            or "your transactions" in blob_lc
+        )
+        if not has_txn:
+            return False
+        if "withdrawal" in blob_lc and "deposit" in blob_lc:
+            return False
+        return True
+
+    @staticmethod
+    def _collapse_cc_movement_columns(zones: List[ColumnZone]) -> List[ColumnZone]:
+        """Keep a single rightmost movement column as *debit* (amount + Dr/Cr)."""
+        mv = [z for z in zones if z.semantic_role in ("debit", "credit")]
+        if len(mv) < 2:
+            return zones
+        keeper = max(mv, key=lambda z: z.x_center)
+        for z in mv:
+            if z is not keeper:
+                z.semantic_role = None
+        keeper.semantic_role = "debit"
+        return zones
+
+    def _strip_cc_hallucinated_balance(self, zones: List[ColumnZone]) -> List[ColumnZone]:
+        """Remove *balance* roles not grounded in balance header vocabulary."""
+        try:
+            from rapidfuzz import fuzz  # type: ignore
+        except ImportError:
+            return zones
+
+        threshold = self.config.fuzzy_threshold
+        bal_kw = self.config.balance_keywords
+        for z in zones:
+            if z.semantic_role != "balance":
+                continue
+            cand = (z.header_text or "").lower().strip()
+            if not cand:
+                z.semantic_role = None
+                continue
+            best = max(
+                float(fuzz.partial_ratio(cand, kw.lower())) for kw in bal_kw
+            )
+            if best < threshold:
+                z.semantic_role = None
         return zones
 
     # ------------------------------------------------------------------

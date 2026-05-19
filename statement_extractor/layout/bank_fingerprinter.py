@@ -162,7 +162,7 @@ _BANK_REGISTRY = [
         ],
         "date_format_hint": "DD/MM/YYYY",
         "debit_left_of_credit": True,
-        "has_cr_dr_suffix": False,
+        "has_cr_dr_suffix": True,
     },
     {
         "bank_id": "FEDERAL",

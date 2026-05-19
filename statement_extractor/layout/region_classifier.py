@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from ..config import LayoutConfig
 from ..schemas import LogicalRow, RegionType
@@ -65,7 +65,14 @@ _FOOTER_PATTERNS = re.compile(
         \.com\b                              |
         for\s+the\s+period                   |
         summary\s+of\s+transactions?         |
-        number\s+of\s+transactions?
+        number\s+of\s+transactions?          |
+        terms\s+and\s+conditions             |
+        important\s+instructions             |
+        bank\s+never\s+asks                  |
+        never\s+share\s+your                 |
+        do\s+not\s+share                     |
+        subject\s+to                         |
+        insurance\s+policy
     )\b
     """,
     re.IGNORECASE | re.VERBOSE,
@@ -128,6 +135,39 @@ _HEADER_VOCAB = frozenset([
     "balance", "withdrawal", "deposit", "reference", "details", "remarks",
     "txn", "transaction", "amount", "dr", "cr",
 ])
+
+# Table-intent keyword patterns (density scoring)
+_EMI_KEYWORDS = re.compile(
+    r"\b(?:emi|amortization|amortisation|installment|instalment|"
+    r"principal|outstanding|tenure)\b",
+    re.IGNORECASE,
+)
+_REWARD_KEYWORDS = re.compile(
+    r"\b(?:reward\s*points?|cashback|cash\s*back|loyalty|miles)\b",
+    re.IGNORECASE,
+)
+_CHARGES_KEYWORDS = re.compile(
+    r"\b(?:charges?|fees?|penalty|service\s*charge|late\s*fee)\b",
+    re.IGNORECASE,
+)
+_INTEREST_KEYWORDS = re.compile(
+    r"\b(?:interest\s+charged|interest\s+rate|int\.?\s*calculation|"
+    r"apr|annual\s+percentage)\b",
+    re.IGNORECASE,
+)
+_CC_KEYWORDS = re.compile(
+    r"\b(?:card\s*no|credit\s*card|minimum\s+due|payment\s+due|"
+    r"available\s+credit|credit\s+limit)\b",
+    re.IGNORECASE,
+)
+_EMI_COLUMN_PATTERN = re.compile(
+    r"\b(?:principal|interest|outstanding|emi\s*amount|instalment)\b",
+    re.IGNORECASE,
+)
+_EMI_DETAILS_HEADER = re.compile(
+    r"\b(?:active\s+)?emi\s+details\b",
+    re.IGNORECASE,
+)
 
 
 class LayoutRegionClassifier:
@@ -262,8 +302,21 @@ class LayoutRegionClassifier:
             header_keyword_score, footer_fraction, score,
         )
 
+        # ── Table-intent classification (fine-grained) ─────────────────
+        intent_type, intent_score = self._classify_table_intent(
+            rows, header_rows, data_rows, col_roles_found, n,
+            date_fraction, numeric_fraction, score,
+        )
+        if intent_type is not None:
+            return intent_type, max(score, intent_score)
+
         if score >= cfg.transaction_score_threshold:
-            return RegionType.TRANSACTION_TABLE, score
+            has_balance = "balance" in col_roles_found
+            if _CC_KEYWORDS.search(header_text) or (
+                not has_balance and "credit" in col_roles_found
+            ):
+                return RegionType.CREDIT_CARD_TRANSACTIONS, score
+            return RegionType.BANK_TRANSACTIONS, score
 
         # Below threshold — decide between metadata and noise
         if numeric_fraction >= cfg.min_numeric_row_fraction:
@@ -302,6 +355,66 @@ class LayoutRegionClassifier:
         if has_balance:
             score += 0.20
         return score
+
+    def _classify_table_intent(
+        self,
+        rows: List[LogicalRow],
+        header_rows: List[LogicalRow],
+        data_rows: List[LogicalRow],
+        col_roles_found: set,
+        n: int,
+        date_fraction: float,
+        numeric_fraction: float,
+        base_score: float,
+    ) -> Tuple[Optional[RegionType], float]:
+        """
+        Detect specialised table types (EMI, rewards, charges, etc.).
+        Returns (None, 0) if no strong intent signal.
+        """
+        all_text = " ".join(r.full_text for r in rows)
+        header_text = " ".join(r.full_text for r in header_rows)
+        emi_hits = len(_EMI_KEYWORDS.findall(all_text))
+
+        # EMI schedule grid (distinct from purchase transaction grids)
+        if _EMI_DETAILS_HEADER.search(header_text):
+            return RegionType.EMI_SCHEDULE, min(1.0, 0.55 + emi_hits * 0.08)
+
+        # EMI schedule: keyword density + principal/interest columns
+        emi_column_header = (
+            _EMI_COLUMN_PATTERN.search(header_text)
+            and emi_hits >= 1
+        )
+        if emi_hits >= 3 or emi_column_header:
+            # Merchant lines on credit-card statements often contain words such as
+            # "principal", "interest", or "amortization" (EMI breakdowns).  Those
+            # are still transaction grids if date + amount columns are present
+            # with healthy row-level date/numeric density.
+            strong_txn_grid = (
+                date_fraction >= self.config.min_date_row_fraction
+                and numeric_fraction >= self.config.min_numeric_row_fraction
+                and "date" in col_roles_found
+                and ("debit" in col_roles_found or "credit" in col_roles_found)
+            )
+            if strong_txn_grid:
+                return None, 0.0
+
+            return RegionType.EMI_SCHEDULE, min(1.0, 0.5 + emi_hits * 0.1)
+
+        # Reward summary
+        reward_hits = len(_REWARD_KEYWORDS.findall(all_text))
+        if reward_hits >= 2 and date_fraction < 0.2:
+            return RegionType.REWARD_SUMMARY, min(1.0, 0.4 + reward_hits * 0.15)
+
+        # Interest calculation
+        if _INTEREST_KEYWORDS.search(header_text) and date_fraction < 0.3:
+            return RegionType.INTEREST_CALCULATION, 0.75
+
+        # Charges table
+        charge_hits = len(_CHARGES_KEYWORDS.findall(header_text))
+        if charge_hits >= 2 and n < 15 and date_fraction < 0.3:
+            return RegionType.CHARGES_TABLE, min(1.0, 0.5 + charge_hits * 0.1)
+
+        return None, 0.0
 
     @staticmethod
     def _header_keyword_score(header_rows: List[LogicalRow]) -> float:

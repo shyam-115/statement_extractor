@@ -124,6 +124,14 @@ _FOOTER_SUMMARY_RE = re.compile(
 # Bare account / reference number — 8+ consecutive digits, no date pattern
 _BARE_LONG_NUMBER_RE = re.compile(r"^\d{8,}$")
 
+# EMI / interest schedule rows (rate + future date) without Dr/Cr amounts
+_EMI_RATE_ROW_RE = re.compile(
+    r"\b\d{1,2}\s*%\s*(?:\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)|\d{4})",
+    re.IGNORECASE,
+)
+# Compact APR / tenure band (percent touching digits) with no Dr/Cr
+_EMI_DENSE_GRID_RE = re.compile(r"\b\d{1,2}\s*%\s*\d", re.IGNORECASE)
+
 
 def is_noise_row(row: LogicalRow) -> bool:
     """
@@ -156,6 +164,19 @@ def is_noise_row(row: LogicalRow) -> bool:
     # Bare long numeric string — likely an account/ref number, not a date
     clean = text.replace(" ", "")
     if _BARE_LONG_NUMBER_RE.match(clean):
+        return True
+
+    # EMI / interest schedule grid (e.g. "16% 20 MAY 26") without ledger Dr/Cr
+    if _EMI_RATE_ROW_RE.search(text) and not re.search(
+        r"\b(?:Dr|Cr)\b", text, re.IGNORECASE
+    ):
+        return True
+
+    if (
+        _EMI_DENSE_GRID_RE.search(text)
+        and not re.search(r"\b(?:Dr|Cr)\b", text, re.IGNORECASE)
+        and sum(1 for ch in text if ch.isdigit()) >= 12
+    ):
         return True
 
     return False

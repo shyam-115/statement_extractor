@@ -96,17 +96,20 @@ class TableSegmenter:
 
     def _is_strong_header(self, row: LogicalRow) -> bool:
         """
-        Return True if the row contains no numbers and matches >= 2 header keywords.
+        Return True if the row matches >= 3 header keywords, OR
+        matches >= 2 header keywords and contains no numbers.
         """
-        if any(t.is_numeric for t in row.tokens):
-            return False
-
         text = row.full_text.lower()
         words = set(re.findall(r"\w+", text))
         matches = len(words.intersection(self.header_words))
 
-        if matches >= 2:
-            row.is_header = True  # force flag update
-            row.is_table_header = True
-            return True
-        return False
+        if matches >= 3:
+            pass
+        elif matches >= 2 and not any(t.is_numeric for t in row.tokens):
+            pass
+        else:
+            return False
+
+        row.is_header = True  # force flag update
+        row.is_table_header = True
+        return True

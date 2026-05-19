@@ -24,7 +24,8 @@ DBSCAN is preferred over k-means because the number of columns is unknown.
 from __future__ import annotations
 
 import logging
-from typing import List
+import re
+from typing import Dict, List
 
 import numpy as np
 from sklearn.cluster import DBSCAN
@@ -33,6 +34,10 @@ from ..config import ColumnDetectionConfig
 from ..schemas import OCRToken, ColumnZone, LogicalRow
 
 logger = logging.getLogger(__name__)
+
+# Bare 4-digit calendar years (1900-2099) must not be used as column anchors.
+# They are date fragments, not standalone amount or date column values.
+_BARE_YEAR = re.compile(r"^(19|20)\d{2}$")
 
 
 class ColumnDetector:
@@ -66,13 +71,39 @@ class ColumnDetector:
         if not rows:
             return []
 
-        # 1. Numeric Clustering (DBSCAN) - Find true data pillars
+        if self.config.vertical_strip_detection:
+            strips = self._split_vertical_strips(rows)
+            if len(strips) > 1:
+                all_zones: List[ColumnZone] = []
+                for strip_rows in strips.values():
+                    zones = self._detect_on_rows(strip_rows)
+                    all_zones.extend(zones)
+                if all_zones:
+                    all_zones.sort(key=lambda z: z.x_center)
+                    for idx, z in enumerate(all_zones):
+                        z.column_id = idx
+                    return all_zones
+
+        return self._detect_on_rows(rows)
+
+    def _detect_on_rows(self, rows: List[LogicalRow]) -> List[ColumnZone]:
+        """Core column detection on a single vertical strip."""
+        if self.config.numeric_fusion:
+            rows = self._fuse_split_numeric_tokens(rows)
+
+        # 1. Numeric Clustering (DBSCAN) - Find true data pillars.
+        # Bare calendar years (e.g. "2026") are excluded: they are fragments
+        # of date strings split by OCR, not real column anchors.
         numeric_x: List[float] = []
         for row in rows:
             if row.is_header:
                 continue
             for token in row.tokens:
                 if token.is_numeric or token.is_date:
+                    # Skip bare year fragments — they drift from the true date
+                    # column x and create phantom zones.
+                    if _BARE_YEAR.match(token.text.strip()):
+                        continue
                     numeric_x.append(token.normalized_x)
 
         if len(numeric_x) < self.config.dbscan_min_samples:
@@ -81,6 +112,16 @@ class ColumnDetector:
                 len(numeric_x),
             )
             return []
+
+        # Short tables (many credit-card layouts) yield only 1 sample per row
+        # per column — clusters of size 2 are common.  Relax support threshold.
+        n_data_rows = max(
+            1,
+            len([r for r in rows if not r.is_header]),
+        )
+        min_support = self.config.min_column_support
+        if n_data_rows <= 14:
+            min_support = min(min_support, 2)
 
         X = np.array(numeric_x).reshape(-1, 1)
         labels = DBSCAN(
@@ -95,7 +136,7 @@ class ColumnDetector:
             mask = labels == label
             xs = X[mask, 0]
             support = int(np.sum(mask))
-            if support < self.config.min_column_support:
+            if support < min_support:
                 continue
             x_center = float(np.median(xs))
             left = float(np.min(xs)) - self.config.boundary_padding
@@ -123,6 +164,104 @@ class ColumnDetector:
             )
 
         return zones
+
+    def _split_vertical_strips(
+        self, rows: List[LogicalRow]
+    ) -> Dict[int, List[LogicalRow]]:
+        """
+        Use vertical projection profile to find column gaps → page strips.
+        """
+        xs: List[float] = []
+        for row in rows:
+            for t in row.tokens:
+                if t.is_numeric or t.is_date:
+                    xs.append(t.normalized_x)
+        if len(xs) < 10:
+            return {0: rows}
+
+        hist, edges = np.histogram(xs, bins=40, range=(0.0, 1.0))
+        # Valleys in histogram indicate column gaps
+        threshold = np.max(hist) * 0.15
+        in_gap = hist < threshold
+        gap_centers: List[float] = []
+        for i, is_gap in enumerate(in_gap):
+            if is_gap:
+                gap_centers.append((edges[i] + edges[i + 1]) / 2)
+
+        if not gap_centers:
+            return {0: rows}
+
+        # Use largest central gap as strip boundary
+        mid_gaps = [g for g in gap_centers if 0.25 < g < 0.75]
+        if not mid_gaps:
+            return {0: rows}
+        split_x = mid_gaps[len(mid_gaps) // 2]
+
+        left, right = [], []
+        for row in rows:
+            cx = np.mean([t.normalized_x for t in row.tokens]) if row.tokens else 0.5
+            (left if cx < split_x else right).append(row)
+        if not left or not right:
+            return {0: rows}
+        return {0: left, 1: right}
+
+    def _fuse_split_numeric_tokens(self, rows: List[LogicalRow]) -> List[LogicalRow]:
+        """
+        Merge adjacent numeric tokens that form a valid Indian number when concatenated.
+        """
+        import re
+        from ..schemas import OCRToken
+
+        indian_num = re.compile(r"^[\d,]+(?:\.\d{1,2})?$")
+        fused_rows: List[LogicalRow] = []
+
+        for row in rows:
+            sorted_toks = sorted(row.tokens, key=lambda t: t.normalized_x)
+            merged: List[OCRToken] = []
+            i = 0
+            while i < len(sorted_toks):
+                t = sorted_toks[i]
+                if (
+                    t.is_numeric
+                    and i + 1 < len(sorted_toks)
+                    and sorted_toks[i + 1].is_numeric
+                ):
+                    nxt = sorted_toks[i + 1]
+                    gap = nxt.normalized_x - t.normalized_x
+                    if gap < 0.08:
+                        combined = t.text + nxt.text
+                        if indian_num.match(combined.replace(" ", "")):
+                            merged.append(
+                                OCRToken(
+                                    text=combined,
+                                    confidence=min(t.confidence, nxt.confidence),
+                                    x1=t.x1, y1=min(t.y1, nxt.y1),
+                                    x2=nxt.x2, y2=max(t.y2, nxt.y2),
+                                    center_x=(t.center_x + nxt.center_x) / 2,
+                                    center_y=(t.center_y + nxt.center_y) / 2,
+                                    normalized_x=(t.normalized_x + nxt.normalized_x) / 2,
+                                    normalized_y=(t.normalized_y + nxt.normalized_y) / 2,
+                                    page_num=t.page_num,
+                                    is_numeric=True,
+                                    is_date=False,
+                                )
+                            )
+                            i += 2
+                            continue
+                merged.append(t)
+                i += 1
+            if merged != row.tokens:
+                row = LogicalRow(
+                    row_id=row.row_id,
+                    tokens=merged,
+                    page_num=row.page_num,
+                    y_center=row.y_center,
+                    is_header=row.is_header,
+                    is_table_header=row.is_table_header,
+                    is_continuation=row.is_continuation,
+                )
+            fused_rows.append(row)
+        return fused_rows
 
     # ------------------------------------------------------------------
     # Token assignment

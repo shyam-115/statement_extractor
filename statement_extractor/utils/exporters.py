@@ -17,8 +17,9 @@ from ..schemas import ExtractionResult, Transaction
 logger = logging.getLogger(__name__)
 
 _CSV_FIELDS = [
-    "txn_date", "description", "reference_no",
+    "transaction_date", "description", "reference_no",
     "debit", "credit", "balance",
+    "tx_type", "validation_flags",
     "confidence_score", "validation_status", "page_num",
 ]
 
@@ -36,6 +37,7 @@ def save_to_json(result: ExtractionResult, output_path: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
     data: Dict[str, Any] = {
+        "schema_version": 1,
         "source_file": result.source_file,
         "total_pages": result.total_pages,
         "total_transactions": len(result.transactions),
@@ -45,6 +47,8 @@ def save_to_json(result: ExtractionResult, output_path: str) -> None:
         "extracted_tables": [t.dict() for t in result.extracted_tables],
         "transactions": [_txn_to_dict(t) for t in result.transactions],
     }
+    if result.validation_summary is not None:
+        data["validation_summary"] = result.validation_summary.model_dump()
 
     with path.open("w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2, ensure_ascii=False, default=str)
@@ -79,14 +83,22 @@ def save_to_csv(result: ExtractionResult, output_path: str) -> None:
 # ---------------------------------------------------------------------------
 
 def _txn_to_dict(txn: Transaction) -> Dict[str, Any]:
-    """Convert a Transaction to a plain dict with safe defaults."""
+    """
+    Canonical transaction record for JSON/CSV consumers.
+
+    Uses one field name per concept (no duplicate aliases).  Debit/credit
+    are positive magnitudes; use ``tx_type`` / document context for Dr/Cr.
+    """
     return {
-        "txn_date":         txn.txn_date or "",
+        "transaction_date": txn.txn_date,
         "description":      txn.description or "",
         "reference_no":     txn.reference_no or "",
-        "debit":            txn.debit if txn.debit is not None else "",
-        "credit":           txn.credit if txn.credit is not None else "",
-        "balance":          txn.balance if txn.balance is not None else "",
+        "debit":            txn.debit if txn.debit is not None else None,
+        "credit":           txn.credit if txn.credit is not None else None,
+        "balance":          txn.balance if txn.balance is not None else None,
+        "tx_type":          txn.tx_type or "",
+        "validation_flags": list(txn.validation_flags),
+        "continuation":     txn.continuation,
         "confidence_score": round(txn.confidence_score, 4),
         "validation_status": txn.validation_status.value,
         "page_num":         txn.page_num,

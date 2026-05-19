@@ -65,13 +65,13 @@ def _build_parser() -> argparse.ArgumentParser:
         "--debug",
         action="store_true",
         default=False,
-        help="Render debug overlay images (saved to debug_output/)",
+        help="Render debug overlay images (saved to output/debug_output/)",
     )
     extract.add_argument(
         "--debug-dir",
         metavar="DIR",
-        default="debug_output",
-        help="Directory to save debug images (default: debug_output)",
+        default="output/debug_output",
+        help="Directory to save debug images (default: output/debug_output)",
     )
     extract.add_argument(
         "--dpi",
@@ -154,7 +154,7 @@ def _run_extract(args: argparse.Namespace) -> int:
         "warnings":        result.extraction_warnings,
         "transactions":    [
             {
-                "txn_date":   t.txn_date,
+                "transaction_date": t.txn_date,
                 "description": (t.description or "")[:60],
                 "debit":      t.debit,
                 "credit":     t.credit,

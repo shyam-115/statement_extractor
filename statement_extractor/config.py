@@ -20,16 +20,27 @@ class OCRConfig:
     det_db_box_thresh: float = 0.5      # box confidence threshold
     rec_batch_num: int = 6
     min_confidence: float = 0.30        # tokens below this are discarded
-    dpi: int = 200                      # PDF→image render DPI
+    numeric_min_confidence: float = 0.20  # lower threshold for amount cells
+    dpi: int = 200                      # Base DPI
+    adaptive_dpi: bool = True           # Adjust DPI based on document type
+    digital_dpi: int = 200              # DPI for digital PDFs
+    scanned_dpi: int = 300              # DPI for scans/images
+    low_quality_dpi: int = 250          # medium quality scans
     disable_mkldnn: bool = True         # avoids some Paddle 3.x CPU oneDNN errors
+    cache_dir: str = "./ocr_cache"      # content-hashed page OCR cache
+    ocr_cache_enabled: bool = True
+    finance_ocr_correction: bool = True  # O→0, l→1 in numeric contexts
+    numeric_ensemble: bool = False       # Tesseract+EasyOCR vote (optional deps)
 
 
 @dataclass
 class RowGroupingConfig:
     """Parameters that control y-axis row clustering."""
     dbscan_eps_fraction: float = 0.008  # fraction of page height for DBSCAN eps
+    dynamic_eps_from_token_height: bool = True  # eps = 0.5 × median token height
     dbscan_min_samples: int = 1
     min_row_tokens: int = 1
+    skew_eps_multiplier: float = 1.5    # scale eps when residual skew > 0.5°
     # narration continuation: if a line contains NO numeric token and sits
     # within this fraction of page height below the previous row it is merged
     narration_y_gap_fraction: float = 0.025
@@ -42,6 +53,8 @@ class ColumnDetectionConfig:
     dbscan_min_samples: int = 2         # minimum hits to form a column band
     min_column_support: int = 3         # columns with fewer hits are dropped
     boundary_padding: float = 0.015     # extra padding added to column boundaries
+    vertical_strip_detection: bool = True  # split page into strips before clustering
+    numeric_fusion: bool = True         # merge split Indian number tokens
 
 
 @dataclass
@@ -57,11 +70,14 @@ class HeaderInferenceConfig:
     narration_keywords: List[str] = field(default_factory=lambda: [
         "narration", "description", "particulars", "details",
         "remarks", "transaction details", "particuler", "detail",
+        "merchant category", "emi eligibility", "fx transactions",
     ])
     debit_keywords: List[str] = field(default_factory=lambda: [
         "debit", "withdrawal", "withdrawals", "dr", "paid out",
         "money out", "amount dr", "debit amount", "withdraw",
         "debits", "debit(dr)",
+        "amount (rs", "amount(rs", "amount (in inr)", "amount in inr",
+        "amount(rs.)", "charges",
     ])
     credit_keywords: List[str] = field(default_factory=lambda: [
         "credit", "deposit", "deposits", "cr", "received",
@@ -78,6 +94,17 @@ class HeaderInferenceConfig:
         "utr", "transaction id", "txn id", "instrument no",
         "chq/ref", "reference no", "ref number",
     ])
+    # Serial-number / row-index column headers — these are NOT financial columns.
+    # Zones matched by these keywords are assigned the "index" role and are
+    # completely excluded from debit / credit / balance resolution.
+    index_keywords: List[str] = field(default_factory=lambda: [
+        "#", "no", "no.", "sno", "s.no", "sr.no", "sl.no", "sl no",
+        "sr no", "serial no", "serial", "item no", "s no",
+    ])
+    noise_keywords: List[str] = field(default_factory=lambda: [
+        "cashback", "reward", "rewards", "points", "cash back",
+        "reward points", "promo", "cb", "reward pts",
+    ])
 
 
 @dataclass
@@ -85,12 +112,13 @@ class ValidationConfig:
     """
     Validation settings.
 
-    The validator is a fidelity-first pass-through: it does NOT perform
-    arithmetic checks or modify any extracted values.  All data is kept
-    exactly as it appears in the source document.
+    When ledger_validation is enabled, LedgerValidator runs non-mutating
+    balance checks.  BalanceValidator still applies fidelity-first status.
     """
-    # Kept for API compatibility — has no effect in fidelity-first mode.
     min_validated_ratio: float = 0.60
+    ledger_validation: bool = True
+    tolerance_absolute: float = 0.01
+    tolerance_fraction: float = 0.005
 
 
 @dataclass
@@ -151,6 +179,16 @@ class ConfidenceFusionConfig:
 
 
 @dataclass
+class PipelineConfig:
+    """Post-extraction pipeline feature flags."""
+    semantic_resolver: bool = True
+    transaction_taxonomy: bool = True
+    cross_page_stitching: bool = True
+    early_exit_on_full_table: bool = False  # skip pages after full txn table found
+    min_transactions_for_early_exit: int = 5
+
+
+@dataclass
 class ExtractorConfig:
     ocr: OCRConfig = field(default_factory=OCRConfig)
     row_grouping: RowGroupingConfig = field(default_factory=RowGroupingConfig)
@@ -160,6 +198,7 @@ class ExtractorConfig:
     layout: LayoutConfig = field(default_factory=LayoutConfig)
     bank_fingerprint: BankFingerprintConfig = field(default_factory=BankFingerprintConfig)
     confidence_fusion: ConfidenceFusionConfig = field(default_factory=ConfidenceFusionConfig)
+    pipeline: PipelineConfig = field(default_factory=PipelineConfig)
     debug: bool = False
-    debug_output_dir: str = "debug_output"
+    debug_output_dir: str = "output/debug_output"
     max_pages: int = 0                  # 0 = all pages

@@ -39,6 +39,13 @@ import numpy as np
 from ..config import OCRConfig
 from ..schemas import OCRToken
 from ..parsing.numeric_parser import NumericParser
+from .finance_utils import (
+    correct_numeric_confusion,
+    estimate_image_quality,
+    load_cached_tokens,
+    page_cache_key,
+    save_cached_tokens,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -139,11 +146,38 @@ class OCREngine:
         tokens_per_page: List[List[OCRToken]] = []
         for page_num, img in enumerate(images):
             img = self._deskew(img)
-            tokens = self._run_ocr(img, page_num)
+            dpi = self._adaptive_dpi_for_image(img)
+            cache_key = page_cache_key(img, dpi, page_num)
+            cached = None
+            if self.config.ocr_cache_enabled:
+                cached = load_cached_tokens(self.config.cache_dir, cache_key)
+            if cached is not None:
+                tokens = [OCRToken(**t) for t in cached]
+                for t in tokens:
+                    t.page_num = page_num
+            else:
+                tokens = self._run_ocr(img, page_num)
+                if self.config.ocr_cache_enabled and tokens:
+                    save_cached_tokens(
+                        self.config.cache_dir,
+                        cache_key,
+                        [t.model_dump() for t in tokens],
+                    )
             tokens_per_page.append(tokens)
             logger.debug("Page %d → %d tokens", page_num, len(tokens))
 
         return tokens_per_page, images
+
+    def _adaptive_dpi_for_image(self, img: np.ndarray) -> int:
+        """Pick DPI tier based on image sharpness when adaptive_dpi is on."""
+        if not self.config.adaptive_dpi:
+            return self.config.dpi
+        q = estimate_image_quality(img)
+        if q >= 0.6:
+            return self.config.digital_dpi
+        if q >= 0.35:
+            return self.config.low_quality_dpi
+        return self.config.scanned_dpi
 
     # ------------------------------------------------------------------
     # PDF → images
@@ -264,11 +298,19 @@ class OCREngine:
 
         tokens: List[OCRToken] = []
         for text, confidence, box_points in self._iter_ocr_lines(result):
-            if confidence < self.config.min_confidence:
-                continue
             text = text.strip()
             if not text:
                 continue
+            is_num_like = self._numeric_parser.looks_like_number(text)
+            min_conf = (
+                self.config.numeric_min_confidence
+                if is_num_like
+                else self.config.min_confidence
+            )
+            if confidence < min_conf:
+                continue
+            if self.config.finance_ocr_correction and is_num_like:
+                text = correct_numeric_confusion(text)
 
             xs = [float(p[0]) for p in box_points]
             ys = [float(p[1]) for p in box_points]

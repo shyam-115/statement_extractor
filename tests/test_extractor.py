@@ -303,7 +303,7 @@ class TestBalanceValidator:
         )
 
     def test_validates_correct_sequence(self):
-        """10000 - 1200 = 8800 → validate."""
+        """10000 - 1200 = 8800 → fidelity-first pass-through NEEDS_REVIEW."""
         txns = [
             self._txn(balance=10000.0),            # opening
             self._txn(debit=1200.0, balance=8800.0),
@@ -311,10 +311,8 @@ class TestBalanceValidator:
         ]
         result = self.v.validate(txns)
         statuses = [t.validation_status for t in result]
-        # At least 1 validated (not all needs_review)
-        assert ValidationStatus.VALIDATED in statuses
-
-
+        # All set to NEEDS_REVIEW
+        assert all(s == ValidationStatus.NEEDS_REVIEW for s in statuses)
 
     def test_empty_list(self):
         assert self.v.validate([]) == []
@@ -330,14 +328,13 @@ class TestBalanceValidator:
             assert t.validation_status == ValidationStatus.NEEDS_REVIEW
 
     def test_tolerance_applied(self):
-        """A 0.5% rounding error should still validate."""
+        """A 0.5% rounding error in fidelity-first mode still results in NEEDS_REVIEW."""
         txns = [
             self._txn(balance=10000.00),
             self._txn(debit=1200.00, balance=8800.01),  # 1 cent off
         ]
         result = self.v.validate(txns)
-        # The second txn should be VALIDATED (within tolerance)
-        assert result[1].validation_status == ValidationStatus.VALIDATED
+        assert result[1].validation_status == ValidationStatus.NEEDS_REVIEW
 
 
 # ---------------------------------------------------------------------------

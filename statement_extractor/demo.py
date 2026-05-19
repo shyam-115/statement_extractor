@@ -120,13 +120,13 @@ def main() -> None:
         from statement_extractor.config import ExtractorConfig, OCRConfig
     except ImportError as exc:
         print(f"\n[ERROR] Import failed: {exc}")
-        print("Run:  pip install paddlepaddle paddleocr opencv-python-headless pymupdf pandas scikit-learn rapidfuzz")
+        print("Run:  pip install paddlepaddle paddleocr opencv-python-headless pymupdf scikit-learn rapidfuzz")
         sys.exit(1)
 
     config = ExtractorConfig(
         ocr=OCRConfig(dpi=200, use_gpu=False),
         debug=True,
-        debug_output_dir="debug_output",
+        debug_output_dir="output/debug_output",
     )
 
     print("[2/4] Initialising StatementExtractor …")
@@ -158,12 +158,12 @@ def main() -> None:
         )
 
     # Save outputs
-    extractor.save_json(result, "demo_output.json")
-    extractor.save_csv(result, "demo_output.csv")
+    extractor.save_json(result, "output/demo_output.json")
+    extractor.save_csv(result, "output/demo_output.csv")
     print("\nOutputs saved:")
-    print("  → demo_output.json")
-    print("  → demo_output.csv")
-    print("  → debug_output/page_000_debug.png")
+    print("  → output/demo_output.json")
+    print("  → output/demo_output.csv")
+    print("  → output/debug_output/page_000_debug.png")
 
     # Cleanup temp image
     try:

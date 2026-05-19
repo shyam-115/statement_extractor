@@ -16,7 +16,6 @@ pdf2image==1.17.0            # fallback (requires poppler system package)
 
 # Numeric & layout
 numpy>=1.26.0,<3.0
-pandas>=2.2.0
 scikit-learn>=1.5.0          # DBSCAN for row/column clustering
 
 # Data validation
@@ -27,8 +26,7 @@ pydantic-settings>=2.0.0
 rapidfuzz>=3.8.0
 
 # Utilities
-python-dotenv>=1.0.0
-requests>=2.31.0
+
 
 # ============================================================
 # Optional — Table Transformer (Tier 1 upgrade, Option A)

@@ -159,19 +159,23 @@ extractor = StatementExtractor(config)
 
 ```json
 {
+  "schema_version": 1,
   "source_file": "statement.pdf",
   "total_pages": 3,
   "total_transactions": 24,
-  "column_mapping": {"0": "date", "1": "narration", "2": "debit", "3": "balance"},
+  "column_mapping": {"p1_t1_col0": "date", "p1_t1_col1": "narration", "p1_t1_col2": "debit", "p1_t1_col3": "balance"},
   "extraction_warnings": [],
   "transactions": [
     {
-      "txn_date": "03/05/2024",
+      "transaction_date": "03/05/2024",
       "description": "UPI-PHONEPE-Grocery Store",
       "reference_no": null,
       "debit": 1200.0,
       "credit": null,
       "balance": 48800.0,
+      "tx_type": "",
+      "validation_flags": [],
+      "continuation": false,
       "confidence_score": 0.94,
       "validation_status": "validated",
       "page_num": 0,
@@ -180,6 +184,8 @@ extractor = StatementExtractor(config)
   ]
 }
 ```
+
+`transactions[]` uses a single canonical shape: `transaction_date`, `debit` / `credit` as positive magnitudes (Dr/Cr semantics come from the source row and `raw_text`), and optional `balance` (on some credit-card layouts this column is rewards/cashback, not a running ledger balance).
 
 ### Validation Statuses
 

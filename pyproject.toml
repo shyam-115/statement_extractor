@@ -19,11 +19,9 @@ dependencies = [
     "pymupdf>=1.24.0",
     "pdf2image>=1.17.0",
     "numpy>=1.26.0",
-    "pandas>=2.2.0",
     "scikit-learn>=1.5.0",
     "pydantic>=2.5.0",
     "rapidfuzz>=3.8.0",
-    "python-dotenv>=1.0.0",
 ]
 
 [project.scripts]

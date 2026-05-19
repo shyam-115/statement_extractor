@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from ..config import ExtractorConfig
 from ..schemas import ColumnZone, LogicalRow, OCRToken, Transaction, ValidationStatus
@@ -100,15 +100,28 @@ class TransactionReconstructor:
         Map every token in *row* to a column zone and build a Transaction.
         Returns None if the row carries no meaningful financial data.
         """
-        # Bucket tokens by role
+        # Bucket tokens by role.
+        # 'index' tokens (serial number column) are bucketed separately
+        # and completely excluded from financial resolution.
         buckets: Dict[str, List[OCRToken]] = {
-            "date": [], "narration": [], "debit": [],
+            "index": [], "date": [], "narration": [], "debit": [],
             "credit": [], "balance": [], "reference": [], "unknown": [],
+            "noise": [],
         }
 
         for token in row.tokens:
             col_id = ColumnDetector.assign_token_to_column(token, zones)
             role = role_map.get(col_id, "unknown")
+
+            # Tokens from serial-number / index columns are not financial data — skip entirely.
+            if role == "index":
+                buckets["index"].append(token)
+                continue
+
+            # Tokens from noise columns (cashback, rewards, etc.) — skip entirely.
+            if role == "noise":
+                buckets["noise"].append(token)
+                continue
 
             # Override: numeric tokens in an "unknown" zone go to narration
             # only if they look like dates; amounts stay unknown for later resolution
@@ -136,42 +149,122 @@ class TransactionReconstructor:
         reference_no = self._resolve_reference(buckets["reference"], buckets["narration"])
 
         # --- Amounts ---
-        debit   = self._resolve_amount(buckets["debit"])
-        credit  = self._resolve_amount(buckets["credit"])
-        balance = self._resolve_amount(buckets["balance"])
+        debit_val, debit_sign = self._resolve_amount_with_sign(buckets["debit"])
+        credit_val, credit_sign = self._resolve_amount_with_sign(buckets["credit"])
+        balance, _ = self._resolve_amount_with_sign(buckets["balance"])
+        
+        debit, credit = None, None
 
-        # Single-amount-column: unknown numeric tokens are stored in a
-        # temporary field so the balance validator can resolve them later.
-        unknown_amounts = [
-            self._parser.clean_amount_str(t.text)
-            for t in buckets["unknown"]
-            if t.is_numeric
-        ]
-        unknown_amounts = [a for a in unknown_amounts if a is not None]
+        # Apply explicit CR/DR suffix overrides over standard column assignments
+        if debit_sign == "credit":
+            credit = debit_val
+        elif debit_val is not None:
+            debit = debit_val
 
-        # If debit/credit/balance are all missing but we have unknowns,
-        # try to distribute them (rightmost → balance heuristic)
-        if balance is None and debit is None and credit is None and unknown_amounts:
-            unknown_tokens_sorted = sorted(
-                [t for t in buckets["unknown"] if t.is_numeric],
-                key=lambda t: t.normalized_x,
+        if credit_sign == "debit":
+            debit = credit_val
+        elif credit_val is not None:
+            credit = credit_val
+
+        # --- Resolve unassigned numeric tokens via spatial heuristics ---
+        unknown_numeric_tokens = sorted(
+            [t for t in buckets["unknown"] if t.is_numeric],
+            key=lambda t: t.normalized_x,
+        )
+
+        if unknown_numeric_tokens:
+            debit_zone = next((z for z in zones if role_map.get(z.column_id) == "debit"), None)
+            credit_zone = next((z for z in zones if role_map.get(z.column_id) == "credit"), None)
+
+            # Prefer explicit Dr/Cr on unknown-bucket numerics (single-column CC layouts)
+            # before treating a lone number as a running balance.
+            signed_remaining: List[OCRToken] = []
+            for t in unknown_numeric_tokens:
+                parsed = self._parser.parse_amount(t.text)
+                if parsed is None:
+                    signed_remaining.append(t)
+                    continue
+                amount_val, sign = parsed
+                if sign == "credit" and credit is None:
+                    credit = amount_val
+                elif sign == "debit" and debit is None:
+                    debit = amount_val
+                else:
+                    signed_remaining.append(t)
+            unknown_numeric_tokens = sorted(
+                signed_remaining, key=lambda t: t.normalized_x
             )
-            if len(unknown_amounts) == 1:
-                balance = unknown_amounts[0]
-            elif len(unknown_amounts) >= 2:
-                # Rightmost → balance; leftmost movement → debit/credit TBD
-                balance = self._parser.clean_amount_str(
-                    unknown_tokens_sorted[-1].text
-                )
-                movement = self._parser.clean_amount_str(
-                    unknown_tokens_sorted[0].text
-                )
-                if movement is not None:
-                    debit = movement  # validator will swap to credit if needed
 
-        # Balance column set but movement in another unassigned numeric zone
-        elif balance is not None and debit is None and credit is None and unknown_amounts:
-            debit = unknown_amounts[0]
+            # If everything is missing, rightmost is balance, leftmost is movement
+            if balance is None and debit is None and credit is None:
+                if len(unknown_numeric_tokens) == 1:
+                    lone = unknown_numeric_tokens[0]
+                    lone_parsed = self._parser.parse_amount(lone.text)
+                    if lone_parsed is None or lone_parsed[1] == "unknown":
+                        balance = self._parser.clean_amount_str(lone.text)
+                    unknown_numeric_tokens = []
+                elif unknown_numeric_tokens:
+                    balance = self._parser.clean_amount_str(unknown_numeric_tokens[-1].text)
+                    unknown_numeric_tokens = unknown_numeric_tokens[:-1]
+            
+            # Distribute remaining unknown tokens to missing debit/credit slots
+            for t in unknown_numeric_tokens:
+                parsed = self._parser.parse_amount(t.text)
+                if parsed is None:
+                    continue
+                amount_val, sign = parsed
+
+                if debit is None and credit is None:
+                    assigned = False
+                    
+                    if sign == "credit":
+                        credit = amount_val
+                        assigned = True
+                    elif sign == "debit":
+                        debit = amount_val
+                        assigned = True
+
+                    if not assigned and debit_zone and not credit_zone:
+                        if t.normalized_x > debit_zone.right_boundary + 0.01:
+                            credit = amount_val
+                            assigned = True
+                        else:
+                            debit = amount_val
+                            assigned = True
+                    elif credit_zone and not debit_zone:
+                        if t.normalized_x < credit_zone.left_boundary - 0.01:
+                            debit = amount_val
+                            assigned = True
+                        else:
+                            credit = amount_val
+                            assigned = True
+                            
+                    if not assigned:
+                        if debit_zone and credit_zone:
+                            dist_debit = abs(t.normalized_x - debit_zone.x_center)
+                            dist_credit = abs(t.normalized_x - credit_zone.x_center)
+                            if dist_credit < dist_debit:
+                                credit = amount_val
+                            else:
+                                debit = amount_val
+                        else:
+                            debit = amount_val  # absolute fallback
+
+                elif debit is None and credit is not None:
+                    if sign == "credit":
+                        credit = amount_val  # override or append
+                    else:
+                        debit = amount_val
+                elif credit is None and debit is not None:
+                    if sign == "debit":
+                        debit = amount_val
+                    else:
+                        credit = amount_val
+
+        # --- Inline Dr/Cr reconciliation (esp. credit-card + multi-column PDFs) ---
+        debit, credit = self._refine_debit_credit_from_inline_suffixes(
+            row, debit, credit, balance
+        )
 
         # --- Narration ---
         description = self._resolve_narration(
@@ -274,11 +367,109 @@ class TransactionReconstructor:
 
     def _resolve_amount(self, tokens: List[OCRToken]) -> Optional[float]:
         """Parse the first valid amount from *tokens*, None if none found."""
+        val, _ = self._resolve_amount_with_sign(tokens)
+        return val
+
+    # Standalone CR/DR indicator tokens (case-insensitive)
+    _CR_INDICATORS = frozenset({"cr", "cr.", "credit"})
+    _DR_INDICATORS = frozenset({"dr", "dr.", "debit"})
+    # Inline amount + Dr/Cr anywhere in the row (credit-card PDFs)
+    _INLINE_DRCR_RE = re.compile(
+        r"(?:INR|Rs\.?|₹)?\s*([\d,]+(?:\.\d{1,2})?)\s*(Dr|Cr)\b",
+        re.IGNORECASE,
+    )
+
+    def _refine_debit_credit_from_inline_suffixes(
+        self,
+        row: LogicalRow,
+        debit: Optional[float],
+        credit: Optional[float],
+        balance: Optional[float],
+    ) -> Tuple[Optional[float], Optional[float]]:
+        """
+        Align debit/credit with explicit Dr/Cr markers in *row.full_text*.
+
+        Uses the largest amount that carries an inline suffix so credit-card
+        rows with a cashback column still pick the correct main movement.
+
+        Savings / passbook PDFs often append ``Cr`` only to the *running balance*
+        (e.g. ``270.00  53762.47 Cr``).  That suffix must not overwrite a
+        movement amount already taken from debit/credit columns, and must not
+        be mistaken for a deposit when it matches the extracted balance.
+        """
+        pairs: List[Tuple[float, str]] = []
+        for m in self._INLINE_DRCR_RE.finditer(row.full_text):
+            parsed = self._parser.parse_amount(f"{m.group(1)} {m.group(2)}")
+            if parsed is None:
+                continue
+            val, sign = parsed
+            if sign == "unknown":
+                continue
+            pairs.append((val, sign))
+        if not pairs:
+            return debit, credit
+
+        prim_val, prim_sign = max(pairs, key=lambda x: abs(x[0]))
+
+        if debit is None and credit is None:
+            # Ledger balance is often the only inline ``Cr`` on savings rows.
+            # Do not fabricate a "credit" movement from it.
+            if (
+                balance is not None
+                and prim_sign == "credit"
+                and abs(prim_val - balance)
+                <= max(abs(balance) * 0.015, 0.05)
+            ):
+                return None, None
+            if prim_sign == "debit":
+                return prim_val, None
+            return None, prim_val
+
+        eff_side = "debit" if debit is not None else "credit"
+        eff_val = debit if debit is not None else credit
+        if eff_val is None:
+            return debit, credit
+
+        tol = max(abs(prim_val) * 0.015, 0.05)
+        if abs(eff_val - prim_val) <= tol:
+            if (eff_side == "debit" and prim_sign != "debit") or (
+                eff_side == "credit" and prim_sign != "credit"
+            ):
+                if prim_sign == "debit":
+                    return prim_val, None
+                return None, prim_val
+            return debit, credit
+
+        # ``prim_val`` is typically the suffixed running balance, not the
+        # withdrawal/deposit cell — keep column / spatial assignments.
+        return debit, credit
+
+    def _resolve_amount_with_sign(self, tokens: List[OCRToken]) -> Tuple[Optional[float], str]:
+        """
+        Parse the first valid amount from *tokens*, returning (value, sign).
+
+        Sign detection strategy (ordered by priority):
+        1. Inline suffix — amount text itself contains CR/DR (e.g. "589.00 Cr")
+        2. Adjacent token — a separate non-numeric token in the same bucket
+           carries the CR/DR indicator (e.g. tokens ["589.00", "Cr"])
+        3. Falls back to "unknown" if no indicator is found.
+        """
         for token in tokens:
-            val = self._parser.clean_amount_str(token.text)
-            if val is not None:
-                return val
-        return None
+            parsed = self._parser.parse_amount(token.text)
+            if parsed is not None:
+                val, sign = parsed
+                if sign != "unknown":
+                    return parsed
+                # Amount found but no inline sign — scan all tokens in the
+                # bucket for standalone CR/DR indicator tokens.
+                for t in tokens:
+                    t_lower = t.text.strip().lower()
+                    if t_lower in self._CR_INDICATORS:
+                        return val, "credit"
+                    if t_lower in self._DR_INDICATORS:
+                        return val, "debit"
+                return val, "unknown"
+        return None, "unknown"
 
     def _resolve_narration(
         self,

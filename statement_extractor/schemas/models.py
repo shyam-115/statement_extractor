@@ -79,10 +79,25 @@ class ValidationStatus(str, Enum):
 class RegionType(str, Enum):
     """Layout region classification result."""
     TRANSACTION_TABLE = "transaction_table"
+    BANK_TRANSACTIONS = "bank_transactions"
+    CREDIT_CARD_TRANSACTIONS = "credit_card_transactions"
+    EMI_SCHEDULE = "emi_schedule"
+    REWARD_SUMMARY = "reward_summary"
+    CHARGES_TABLE = "charges_table"
+    INTEREST_CALCULATION = "interest_calculation"
     METADATA_TABLE    = "metadata_table"
     FOOTER            = "footer"
     HEADER_BLOCK      = "header_block"
     NOISE             = "noise"
+
+    @classmethod
+    def is_transaction_region(cls, value: "RegionType") -> bool:
+        """True if this region should feed transaction reconstruction."""
+        return value in {
+            cls.TRANSACTION_TABLE,
+            cls.BANK_TRANSACTIONS,
+            cls.CREDIT_CARD_TRANSACTIONS,
+        }
 
 
 class BankProfile(BaseModel):
@@ -110,6 +125,13 @@ class ConfidenceFactors(BaseModel):
 # Output transaction model
 # ---------------------------------------------------------------------------
 
+class ValidationSummary(BaseModel):
+    """Document-level validation summary from LedgerValidator."""
+    ledger_mismatches: int = 0
+    date_anomalies: List[str] = Field(default_factory=list)
+    duplicates_found: bool = False
+
+
 class Transaction(BaseModel):
     """Final extracted and validated transaction record."""
     txn_date:          Optional[str]   = None
@@ -122,6 +144,10 @@ class Transaction(BaseModel):
     validation_status: ValidationStatus = ValidationStatus.NEEDS_REVIEW
     page_num:          int             = 0
     raw_text:          str             = ""
+    tx_type:           str             = ""
+    validation_flags:  List[str]       = Field(default_factory=list)
+    continuation:      bool            = False
+    carried_balance:   Optional[float] = None
     # Optional enriched fields (populated when confidence fusion is enabled)
     confidence_factors: Optional[ConfidenceFactors] = None
 
@@ -142,6 +168,7 @@ class ExtractionResult(BaseModel):
     source_file:              str                  = ""
     extraction_warnings:      List[str]            = Field(default_factory=list)
     column_mapping:           Dict[str, str]       = Field(default_factory=dict)
+    validation_summary:       Optional[ValidationSummary] = None
     # Enterprise fields
     bank_profile:             Optional[BankProfile] = None
     document_confidence_score: float               = Field(default=0.0, ge=0.0, le=1.0)
