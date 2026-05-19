@@ -438,7 +438,11 @@ class StatementExtractor:
         )
 
         # ── Stage 8: Semantic amount resolution ───────────────────────
-        if self.config.pipeline.semantic_resolver and all_transactions:
+        if (
+            self.config.pipeline.semantic_resolver
+            and not self.config.pipeline.document_fidelity
+            and all_transactions
+        ):
             prev_bal: Optional[float] = None
             for txn in all_transactions:
                 self._semantic.apply_to_transaction(
@@ -457,7 +461,11 @@ class StatementExtractor:
                 )
 
         # ── Stage 10: Cross-page stitching ────────────────────────────
-        if self.config.pipeline.cross_page_stitching and all_transactions:
+        if (
+            self.config.pipeline.cross_page_stitching
+            and not self.config.pipeline.document_fidelity
+            and all_transactions
+        ):
             all_transactions = self._stitcher.stitch(all_transactions)
 
         # ── Stage 11: Fidelity-first status tagging ─────────────────────
@@ -466,7 +474,10 @@ class StatementExtractor:
         # ── Stage 12: Ledger reconciliation (non-mutating) ────────────
         validation_summary: Optional[ValidationSummary] = None
         if self.config.validation.ledger_validation and all_transactions:
-            all_transactions, ledger_sum = self._ledger.validate(all_transactions)
+            all_transactions, ledger_sum = self._ledger.validate(
+                all_transactions,
+                flag_duplicates=not self.config.pipeline.document_fidelity,
+            )
             validation_summary = ValidationSummary(
                 ledger_mismatches=ledger_sum.ledger_mismatches,
                 date_anomalies=ledger_sum.date_anomalies,

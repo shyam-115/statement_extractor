@@ -65,7 +65,7 @@ class ColumnZone(BaseModel):
     top_boundary: float = 0.0          # Used for table-bound visual rendering
     bottom_boundary: float = 0.0       # Used for table-bound visual rendering
     support: int = 0           # number of numeric tokens that voted for this column
-    semantic_role: Optional[str] = None  # date|narration|debit|credit|balance|reference
+    semantic_role: Optional[str] = None  # date|value_date|narration|debit|credit|balance|reference|index|noise
     header_text: Optional[str] = None    # literal text captured from the document
 
 

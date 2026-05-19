@@ -195,6 +195,16 @@ def is_footer_row(row: LogicalRow) -> bool:
     return bool(_FOOTER_SUMMARY_RE.search(text))
 
 
+def filter_header_rows_only(rows: List[LogicalRow]) -> List[LogicalRow]:
+    """
+    Return all non-header rows without noise/footer heuristics.
+
+    Used in document-fidelity mode so every ledger line in the source
+    is emitted — nothing is dropped as boilerplate or duplicate.
+    """
+    return [r for r in rows if not r.is_header and not r.is_table_header]
+
+
 def filter_data_rows(rows: List[LogicalRow]) -> List[LogicalRow]:
     """
     Return only rows that are candidates for transaction reconstruction.

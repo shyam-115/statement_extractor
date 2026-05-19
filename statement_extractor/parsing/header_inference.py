@@ -33,6 +33,7 @@ Design notes
 from __future__ import annotations
 
 import logging
+import re
 from typing import Dict, List, Optional, Tuple
 
 from ..config import HeaderInferenceConfig
@@ -41,7 +42,20 @@ from ..schemas import BankProfile, ColumnZone, LogicalRow
 logger = logging.getLogger(__name__)
 
 # Role priority for tie-breaking when scores are equal
-ROLE_PRIORITY = ["noise", "index", "date", "reference", "debit", "credit", "balance", "narration"]
+ROLE_PRIORITY = [
+    "noise", "index", "date", "value_date", "reference",
+    "debit", "credit", "balance", "narration",
+]
+
+# When scoring gap for one role, ignore the other (same header often matches both).
+_GAP_EXCLUSION_PAIRS = {
+    ("debit", "credit"),
+    ("credit", "debit"),
+    ("reference", "index"),
+    ("index", "reference"),
+    ("date", "value_date"),
+    ("value_date", "date"),
+}
 
 # Minimum score margin between first and second-best role to accept a match.
 # If the gap is smaller the assignment is considered ambiguous.
@@ -66,14 +80,15 @@ class HeaderInference:
         self.config = config
         self.bank_profile = bank_profile or BankProfile()
         self._vocab: Dict[str, List[str]] = {
-            "index":     config.index_keywords,
-            "date":      config.date_keywords,
-            "narration": config.narration_keywords,
-            "debit":     config.debit_keywords,
-            "credit":    config.credit_keywords,
-            "balance":   config.balance_keywords,
-            "reference": config.reference_keywords,
-            "noise":     config.noise_keywords,
+            "index":      config.index_keywords,
+            "date":       config.date_keywords,
+            "value_date": config.value_date_keywords,
+            "narration":  config.narration_keywords,
+            "debit":      config.debit_keywords,
+            "credit":     config.credit_keywords,
+            "balance":    config.balance_keywords,
+            "reference":  config.reference_keywords,
+            "noise":      config.noise_keywords,
         }
 
     # ------------------------------------------------------------------
@@ -117,6 +132,9 @@ class HeaderInference:
         else:
             logger.info("No header rows found — applying positional heuristics")
             used_fallback = True
+
+        zones = self._reassign_index_columns_that_are_references(zones)
+        zones = self._fill_roles_from_header_text(zones)
 
         # Fill any still-unassigned zones with positional fallback
         zones = self._positional_fallback(
@@ -204,7 +222,7 @@ class HeaderInference:
             for role, keywords in self._vocab.items():
                 best_role_score = 0.0
                 for kw in keywords:
-                    s = float(fuzz.partial_ratio(candidate_lower, kw.lower()))
+                    s = self._score_header_keyword(candidate_lower, kw)
                     if s > best_role_score:
                         best_role_score = s
                 score_matrix[zone.column_id][role] = best_role_score
@@ -254,18 +272,14 @@ class HeaderInference:
                 # To handle this we exclude the complementary financial role when
                 # computing the gap for the other financial role — this lets debit win
                 # (it is processed first in ROLE_PRIORITY) for the merged column.
-                _FINANCIAL_PAIR = {"debit", "credit"}
-                if role in _FINANCIAL_PAIR:
-                    other_scores = [
-                        s for r, s in zone_scores.items()
-                        if r != role and r not in assigned_roles
-                        and r not in _FINANCIAL_PAIR  # ignore complementary financial role
-                    ]
-                else:
-                    other_scores = [
-                        s for r, s in zone_scores.items()
-                        if r != role and r not in assigned_roles
-                    ]
+                exclude_roles = {role} | assigned_roles
+                for a, b in _GAP_EXCLUSION_PAIRS:
+                    if role == a:
+                        exclude_roles.add(b)
+                other_scores = [
+                    s for r, s in zone_scores.items()
+                    if r not in exclude_roles
+                ]
                 second_best = max(other_scores) if other_scores else 0.0
                 gap = role_score - second_best
 
@@ -318,6 +332,106 @@ class HeaderInference:
                         break
 
         return zones
+
+    # ------------------------------------------------------------------
+    # Header-text repair pass
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _score_header_keyword(candidate_lower: str, keyword: str) -> float:
+        """
+        Score a header candidate against one vocabulary keyword.
+
+        Short keywords (≤3 chars) require a word boundary so ``no`` does not
+        match inside ``Chq./Ref.No.``.
+        """
+        kw = keyword.lower().strip()
+        if len(kw) <= 3:
+            if re.search(rf"\b{re.escape(kw)}\b", candidate_lower):
+                return 100.0
+            return 0.0
+        try:
+            from rapidfuzz import fuzz  # type: ignore
+            return float(fuzz.partial_ratio(candidate_lower, kw))
+        except ImportError:
+            return 100.0 if kw in candidate_lower else 0.0
+
+    @staticmethod
+    def _reassign_index_columns_that_are_references(
+        zones: List[ColumnZone],
+    ) -> List[ColumnZone]:
+        """
+        ``no`` in index vocabulary matches ``ref.no.`` — reclassify those zones.
+        """
+        markers = ("chq", "cheque", "ref", "utr", "instrument")
+        for zone in zones:
+            if zone.semantic_role != "index":
+                continue
+            cand = (zone.header_text or "").lower()
+            if any(m in cand for m in markers):
+                zone.semantic_role = "reference"
+        return zones
+
+    def _fill_roles_from_header_text(self, zones: List[ColumnZone]) -> List[ColumnZone]:
+        """Assign roles to zones that header matching left unassigned."""
+        threshold = self.config.fuzzy_threshold
+        assigned_roles = {z.semantic_role for z in zones if z.semantic_role}
+
+        for zone in zones:
+            if zone.semantic_role is not None:
+                continue
+            cand = (zone.header_text or "").lower().strip()
+            if not cand:
+                continue
+
+            best_role: Optional[str] = None
+            best_score = 0.0
+            for role, keywords in self._vocab.items():
+                if role in assigned_roles and role not in ("debit", "credit"):
+                    continue
+                for kw in keywords:
+                    s = self._score_header_keyword(cand, kw)
+                    if s > best_score:
+                        best_score = s
+                        best_role = role
+
+            if best_role is None or best_score < threshold:
+                continue
+
+            # Merged withdrawal + deposit header → single movement column
+            if best_role in ("debit", "credit"):
+                has_w = any(
+                    self._score_header_keyword(cand, kw) >= threshold
+                    for kw in self.config.debit_keywords
+                )
+                has_d = any(
+                    self._score_header_keyword(cand, kw) >= threshold
+                    for kw in self.config.credit_keywords
+                )
+                if has_w and has_d:
+                    best_role = "debit"
+                    assigned_roles.discard("credit")
+
+            zone.semantic_role = best_role
+            assigned_roles.add(best_role)
+            logger.debug(
+                "Header-text fill: zone %d → %s (score=%.1f, header=%r)",
+                zone.column_id, best_role, best_score, zone.header_text,
+            )
+
+        return zones
+
+    @staticmethod
+    def _zone_header_blocks_amount_role(zone: ColumnZone) -> bool:
+        """True when header text indicates this column is not debit/credit."""
+        cand = (zone.header_text or "").lower()
+        if not cand:
+            return False
+        blocks = (
+            "ref", "chq", "utr", "value dt", "value date", "val dt",
+            "instrument", "txn id", "transaction id",
+        )
+        return any(b in cand for b in blocks)
 
     # ------------------------------------------------------------------
     # Positional fallback
@@ -385,9 +499,14 @@ class HeaderInference:
 
         # 4. Remaining pair → debit / credit (right to left).
         # Zones already assigned "index" or "noise" role are never re-used.
+        # Reference / value-date headers must not receive amount roles.
         if unassigned:
             remaining = sorted(
-                [z for z in unassigned if z.semantic_role not in ("index", "noise")],
+                [
+                    z for z in unassigned
+                    if z.semantic_role not in ("index", "noise")
+                    and not self._zone_header_blocks_amount_role(z)
+                ],
                 key=lambda z: z.x_center,
                 reverse=True,
             )

@@ -102,6 +102,14 @@ class NumericParser:
         t = text.strip()
         if re.match(r"^-?0\d{3,}$", t) and "." not in t:
             return False
+        if NumericParser.is_reference(t):
+            return False
+        if (
+            t.replace(",", "").replace(".", "").isdigit()
+            and len(t.replace(",", "").replace(".", "")) >= 11
+            and "." not in t
+        ):
+            return False
         return bool(_AMOUNT_PATTERN.match(t)) and len(_CLEAN_AMOUNT.sub("", t)) >= 1
 
     @staticmethod

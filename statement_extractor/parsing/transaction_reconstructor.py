@@ -36,7 +36,7 @@ from typing import Dict, List, Optional, Tuple
 from ..config import ExtractorConfig
 from ..schemas import ColumnZone, LogicalRow, OCRToken, Transaction, ValidationStatus
 from ..clustering.column_detector import ColumnDetector
-from ..utils.row_filters import filter_data_rows, is_noise_row
+from ..utils.row_filters import filter_data_rows, filter_header_rows_only, is_noise_row
 from .numeric_parser import NumericParser
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,12 @@ class TransactionReconstructor:
             if z.semantic_role
         }
 
-        for row in filter_data_rows(rows):
+        if self.config.pipeline.document_fidelity:
+            candidate_rows = filter_header_rows_only(rows)
+        else:
+            candidate_rows = filter_data_rows(rows)
+
+        for row in candidate_rows:
             txn = self._build_transaction(row, zones, role_map)
             if txn is not None:
                 transactions.append(txn)
@@ -104,9 +109,9 @@ class TransactionReconstructor:
         # 'index' tokens (serial number column) are bucketed separately
         # and completely excluded from financial resolution.
         buckets: Dict[str, List[OCRToken]] = {
-            "index": [], "date": [], "narration": [], "debit": [],
-            "credit": [], "balance": [], "reference": [], "unknown": [],
-            "noise": [],
+            "index": [], "date": [], "value_date": [], "narration": [],
+            "debit": [], "credit": [], "balance": [], "reference": [],
+            "unknown": [], "noise": [],
         }
 
         for token in row.tokens:
@@ -133,17 +138,25 @@ class TransactionReconstructor:
 
             buckets[role].append(token)
 
+        fidelity = self.config.pipeline.document_fidelity
+
         # Require at least a date OR numeric amount to be a valid transaction row
         has_date = bool(buckets["date"]) or any(t.is_date for t in buckets["narration"])
         has_amount = any(
             bool(buckets[r]) for r in ("debit", "credit", "balance", "unknown")
             if any(t.is_numeric for t in buckets.get(r, []))
         )
-        if not has_date and not has_amount:
+        if not fidelity and not has_date and not has_amount:
+            return None
+        if fidelity and not row.tokens and not row.full_text.strip():
             return None
 
         # --- Date ---
-        txn_date = self._resolve_date(row, buckets["date"], buckets["narration"])
+        txn_date = self._resolve_date(
+            row,
+            buckets["date"] + buckets["value_date"],
+            buckets["narration"],
+        )
 
         # --- Reference ---
         reference_no = self._resolve_reference(buckets["reference"], buckets["narration"])
@@ -180,6 +193,8 @@ class TransactionReconstructor:
             # before treating a lone number as a running balance.
             signed_remaining: List[OCRToken] = []
             for t in unknown_numeric_tokens:
+                if self._parser.is_reference(t.text):
+                    continue
                 parsed = self._parser.parse_amount(t.text)
                 if parsed is None:
                     signed_remaining.append(t)
@@ -209,6 +224,8 @@ class TransactionReconstructor:
             
             # Distribute remaining unknown tokens to missing debit/credit slots
             for t in unknown_numeric_tokens:
+                if self._parser.is_reference(t.text):
+                    continue
                 parsed = self._parser.parse_amount(t.text)
                 if parsed is None:
                     continue
@@ -274,33 +291,20 @@ class TransactionReconstructor:
             reference_no
         )
 
-        # ------------------------------------------------------------------
-        # Generalized structural guard (bank-agnostic)
-        # ------------------------------------------------------------------
-        # By accounting definition, a debit/credit transaction MUST carry at
-        # least one financial movement (debit OR credit).  A row that has only
-        # a balance value and no movement is structurally metadata:
-        #   - Opening balance marker   (first row of the statement)
-        #   - Summary / totals footer  (e.g. "Statement Balance as on:")
-        #   - Account info row         (e.g. "A/c No: 12345  Balance: X")
-        #
-        # EXCEPTION: if the row carries a *structurally valid* calendar date
-        # (day 1-31, month 1-12) it is treated as an opening-balance entry and
-        # kept.  An 8-digit credit card fragment that accidentally matches a
-        # date regex (e.g. "68212345") will fail this check and be dropped.
-        # ------------------------------------------------------------------
-        if debit is None and credit is None:
-            if not self._is_valid_calendar_date(txn_date):
-                # No movement + no real date → definitively metadata, not a transaction
-                return None
-            # Has a real date but no movement → keep as opening-balance entry
-            # (single-balance row; movement will be resolved later if needed)
+        if not fidelity:
+            # ------------------------------------------------------------------
+            # Generalized structural guard (bank-agnostic)
+            # ------------------------------------------------------------------
+            if debit is None and credit is None:
+                if not self._is_valid_calendar_date(txn_date):
+                    return None
 
-        # Drop remaining true noise rows (already passed structural check)
-        if is_noise_row(row):
-            return None
-        if not description and txn_date is None and balance is None:
-            return None
+            if is_noise_row(row):
+                return None
+            if not description and txn_date is None and balance is None:
+                return None
+        elif not description:
+            description = row.full_text.strip() or None
 
         # --- Confidence ---
         all_tokens = row.tokens
@@ -455,6 +459,8 @@ class TransactionReconstructor:
         3. Falls back to "unknown" if no indicator is found.
         """
         for token in tokens:
+            if self._parser.is_reference(token.text):
+                continue
             parsed = self._parser.parse_amount(token.text)
             if parsed is not None:
                 val, sign = parsed

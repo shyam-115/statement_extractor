@@ -57,6 +57,8 @@ class LedgerValidator:
     def validate(
         self,
         transactions: List[Transaction],
+        *,
+        flag_duplicates: bool = True,
     ) -> Tuple[List[Transaction], LedgerValidationSummary]:
         """
         Validate transactions and attach validation_flags.
@@ -71,21 +73,22 @@ class LedgerValidator:
         if not transactions:
             return transactions, summary
 
-        # Duplicate detection
-        seen: Set[Tuple] = set()
-        for txn in transactions:
-            key = (
-                txn.txn_date or "",
-                txn.description or "",
-                txn.debit,
-                txn.credit,
-                txn.balance,
-            )
-            if key in seen and (txn.debit or txn.credit):
-                summary.duplicates_found = True
-                if "DUPLICATE" not in txn.validation_flags:
-                    txn.validation_flags.append("DUPLICATE")
-            seen.add(key)
+        # Duplicate detection (metadata only — never removes rows)
+        if flag_duplicates:
+            seen: Set[Tuple] = set()
+            for txn in transactions:
+                key = (
+                    txn.txn_date or "",
+                    txn.description or "",
+                    txn.debit,
+                    txn.credit,
+                    txn.balance,
+                )
+                if key in seen and (txn.debit or txn.credit):
+                    summary.duplicates_found = True
+                    if "DUPLICATE" not in txn.validation_flags:
+                        txn.validation_flags.append("DUPLICATE")
+                seen.add(key)
 
         # Date anomaly detection
         prev_date: Optional[datetime] = None

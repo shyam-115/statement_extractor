@@ -64,8 +64,11 @@ class HeaderInferenceConfig:
     max_header_rows: int = 5            # how many top rows to scan for headers
     # Semantic vocabulary (lower-cased, order matters for priority)
     date_keywords: List[str] = field(default_factory=lambda: [
-        "date", "txn date", "transaction date", "value date",
+        "date", "txn date", "transaction date",
         "posting date", "tran date", "dt",
+    ])
+    value_date_keywords: List[str] = field(default_factory=lambda: [
+        "value date", "value dt", "val date", "val dt", "value dat",
     ])
     narration_keywords: List[str] = field(default_factory=lambda: [
         "narration", "description", "particulars", "details",
@@ -92,7 +95,8 @@ class HeaderInferenceConfig:
     reference_keywords: List[str] = field(default_factory=lambda: [
         "reference", "ref no", "ref", "chq no", "cheque no",
         "utr", "transaction id", "txn id", "instrument no",
-        "chq/ref", "reference no", "ref number",
+        "chq/ref", "chq./ref", "chq ref", "reference no", "ref number",
+        "chq./ref.no", "chq. no",
     ])
     # Serial-number / row-index column headers — these are NOT financial columns.
     # Zones matched by these keywords are assigned the "index" role and are
@@ -181,9 +185,12 @@ class ConfidenceFusionConfig:
 @dataclass
 class PipelineConfig:
     """Post-extraction pipeline feature flags."""
-    semantic_resolver: bool = True
+    # When True, keep every table row and extracted value as in the source
+    # document — no row drops, merges, or amount rewrites.
+    document_fidelity: bool = True
+    semantic_resolver: bool = False
     transaction_taxonomy: bool = True
-    cross_page_stitching: bool = True
+    cross_page_stitching: bool = False
     early_exit_on_full_table: bool = False  # skip pages after full txn table found
     min_transactions_for_early_exit: int = 5
 

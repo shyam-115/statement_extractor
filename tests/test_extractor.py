@@ -85,6 +85,7 @@ class TestNumericParser:
     @pytest.mark.parametrize("text", [
         "NEFT", "UPI-Payment", "01/05/2024", "Description",
         "", "   ", "ABC", "ACME CORP",
+        "23044109233274",
     ])
     def test_is_amount_negative(self, text):
         assert not self.p.is_amount(text), f"Expected is_amount({text!r}) = False"
@@ -397,3 +398,33 @@ class TestHeaderInference:
         # Rightmost should be balance
         rightmost = max(result, key=lambda z: z.x_center)
         assert rightmost.semantic_role == "balance"
+
+    def test_infer_hdfc_style_headers(self):
+        """HDFC-style grid: ref and value-date columns must not become credit."""
+        xs = [0.08, 0.25, 0.42, 0.52, 0.68, 0.88]
+        zones = [
+            ColumnZone(
+                column_id=i,
+                x_center=xs[i],
+                left_boundary=xs[i] - 0.06,
+                right_boundary=xs[i] + 0.06,
+                support=10,
+            )
+            for i in range(6)
+        ]
+        headers = [
+            ("Date", 0.08),
+            ("Narration", 0.25),
+            ("Chq./Ref.No.", 0.42),
+            ("Value Dt", 0.52),
+            ("Withdrawal Amt. Deposit Amt.", 0.68),
+            ("Closing Balance", 0.88),
+        ]
+        hrow = self._header_row(headers)
+        result = self.hi.infer(zones, [hrow])
+        roles = {z.column_id: z.semantic_role for z in result}
+        assert roles[2] == "reference"
+        assert roles[3] == "value_date"
+        assert roles[4] == "debit"
+        assert roles[5] == "balance"
+        assert roles[3] != "credit"
